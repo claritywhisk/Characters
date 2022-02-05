@@ -14,6 +14,15 @@
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <asterhaven.characters.SleepView
+        android:id="@+id/sleep_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#FFE1E1"
+        android:visibility="gone"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <include
         android:id="@+id/inventory"
         layout="@layout/inventory"
@@ -46,6 +55,7 @@
         android:id="@+id/sleep"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:onClick="sleepButtonClick"
         android:text="@string/sleep_button"
         app:layout_constraintBottom_toTopOf="@+id/textView"
         app:layout_constraintDimensionRatio="1"

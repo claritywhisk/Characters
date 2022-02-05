@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -17,14 +18,14 @@ import kotlin.system.measureTimeMillis
 
 const val EXTENDED_MAP_SIZE = SIDE_LENGTH + 4
 const val SIDE_LENGTH_EXTENDED = SIDE_LENGTH + 2
+private val LOCAL_RANGE = 1..SIDE_LENGTH_EXTENDED
+private val VISIBLE_RANGE = 2..(SIDE_LENGTH + 1)
 
-class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs), DragStarter {
+class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(context, attrs), DragStarter {
     companion object { init { require(SIDE_LENGTH % 2 == 1) } }//todo
 
     private val walk = Walk(this) //contains px offsets from current center
     lateinit var movement : Movement
-
-    val LOCAL_RANGE = 1..SIDE_LENGTH_EXTENDED
 
     //DragStarter rabbit droppings
     override fun dragShadowSize() = DragStarter.ENLARGE_FACTOR * SCALE_TEXT2TILE * tileWidthPx
@@ -45,13 +46,11 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
     //cross into a tile
     fun adjustCenter(dx : Int, dy : Int){
         if(updateJob?.isActive == true){
-            print("Waiting on previous coordinates... ")
             val t : Long
             runBlocking {
                 t = measureTimeMillis { updateJob?.join() }
             }
-            println("$t ms")
-            logToTextView("behind by $t ms", this@WorldView)
+            if(BuildConfig.DEBUG) logToTextView("debug: behind by $t ms", this@WorldView)
         }
         //shift map. use temp in (theoretical) case it's still computing its edges
         val range = 0 until EXTENDED_MAP_SIZE
@@ -73,7 +72,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
         updateJob = movement.startUpdate()
         val t = System.currentTimeMillis()
         updateJob!!.invokeOnCompletion {
-            logToTextView("M update "+(System.currentTimeMillis() - t), this)
+            //logToTextView("M update "+(System.currentTimeMillis() - t), this) //todo?
         }
     }
 
@@ -83,7 +82,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        if(!::computedMap.isInitialized) return //hacky
+        if(!::computedMap.isInitialized) return
         //tidy any finished selections
         while(selectedLocColor.peek()?.animatedFraction == 1f){
             selectedLocs.poll()
@@ -92,6 +91,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
         //Offset to first visible tile's character
         val textXOffset = offsetPx + scaleOffsetPx
         val textYOffset = tileWidthPx - offsetPx - scaleOffsetPx - paints[0].descent()
+        //todo standardize central character placement w/ CharactersView or verify this is same with Paint.Align.LEFT
         var x = textXOffset - walk.xOffset * tileWidthPx - tileWidthPx
         var y : Float
         //some drawing offscreen or partial glyphs
@@ -113,6 +113,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
                 if(c != null) {
                     val paint = paints[c.fontIndex]
                     canvas?.drawText(c.asString, x, y, paint) //draw with right font
+                    if(i in VISIBLE_RANGE && j in VISIBLE_RANGE) see(c)
                 }
                 y += tileWidthPx
             }

@@ -21,7 +21,8 @@ interface DragStarter {
             object : View.DragShadowBuilder(){
                 override fun onDrawShadow(canvas: Canvas?) {
                     val paint = dragPaints()[selected.fontIndex]
-                    canvas?.drawText(selected.asString,0f, dragShadowSize(), paint)
+                    canvas?.let { (this as CharactersView).drawCharacter(selected, paint, canvas) }
+                    //canvas?.drawText(selected.asString,0f, dragShadowSize(), paint)
                 }
                 override fun onProvideShadowMetrics(
                     outShadowSize: Point?,

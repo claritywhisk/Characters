@@ -9,10 +9,11 @@ import android.os.Environment
 import androidx.core.app.ActivityCompat
 import asterhaven.characters.typeface.FontFallback.Font.*
 import asterhaven.characters.typeface.FontFallback.Static.hasGlyph
-import asterhaven.characters.typeface.FontFallback.Static.loadTypeface
+import asterhaven.characters.typeface.FontFallback.Static.loadTypefaces
 import asterhaven.characters.unicodescript.UnicodeScript
 import asterhaven.characters.unicodescript.encodeAllUS
 import java.io.File
+import java.lang.StringBuilder
 import kotlin.reflect.full.staticProperties
 import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
@@ -20,9 +21,7 @@ import kotlin.system.measureTimeMillis
 private const val expected = 199
 
 /*
-    Unicode codepoints examined: 1115101
-    Unifont13 has 80219 Glyphs
-    Default Paint has 78155 (0 unique)
+    Unifont14 with "Upper" has 85921 glyphs.
  */
 
 class GlyphActivity : AppCompatActivity() {
@@ -44,12 +43,14 @@ class GlyphActivity : AppCompatActivity() {
             var fel = 0
             val usableScript = UnicodeSet()
             script.forEach {
-                if(hasGlyph(GNU_UNIFONT, it)){
+                if((gly + fel) % 2500 == 0) println(".")
+                if(hasGlyph(GNU_UNIFONT, it) || hasGlyph(GUN_UNIFONT_UPPER, it)){ //todo hardcoded
                     usableScript.add(it.codePointAt(0))
                     gly++
                 }
                 else if(hasGlyph(SYSTEM_SEVERAL, it)) fel++ //if there were any, should add them too
             }
+            println()
             usableScript.compact()
             if(!usableScript.isEmpty)
                 list.add(createUnicodeScript(usableScript, UScript.getName(properTea.get() as Int)))
@@ -97,17 +98,17 @@ class GlyphActivity : AppCompatActivity() {
     }
 
     private fun createUnicodeScript(uSet: UnicodeSet, name: String) : UnicodeScript {
-        val pairs = ArrayList<Pair<Int, Int>>()
-        for(range in uSet.ranges()) pairs.add(Pair(range.codepoint, range.codepointEnd))
-        val made = UnicodeScript(name, pairs)
-        //println(made)
-        return made
+        val pairs = StringBuilder(uSet.rangeCount * 2)
+        for(range in uSet.ranges()) {
+            pairs.append(String(intArrayOf(range.codepoint, range.codepointEnd), 0, 2))
+        }
+        return UnicodeScript(name, pairs.toString())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        loadTypeface(applicationContext)
+        loadTypefaces(applicationContext)
 
         ActivityCompat.requestPermissions(this,
             arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
@@ -125,7 +126,7 @@ class GlyphActivity : AppCompatActivity() {
         println("ON REQUEST PERMISSIONS RESULT")
         thread {
             val dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-            val file = File(dir, "scripts_json.txt")
+            val file = File(dir, "scripts.txt")
             val t = measureTimeMillis {
                 glyph(file)
             }

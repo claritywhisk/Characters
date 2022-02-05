@@ -10,7 +10,7 @@ import asterhaven.characters.typeface.FontFallback
 import kotlin.math.roundToInt
 
 //@RequiresApi(Build.VERSION_CODES.N)
-open class InventorySlot(context: Context?, attrs: AttributeSet?) : View(context, attrs), DragListener, DragStarter {
+open class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(context, attrs), DragListener, DragStarter {
     companion object {
         private val inventory = ArrayList<UnicodeCharacter>()
         val allSlots = ArrayList<InventorySlot>()
@@ -22,7 +22,10 @@ open class InventorySlot(context: Context?, attrs: AttributeSet?) : View(context
         var invSlotTextSize : Float? = null
         val invSlotPaints by lazy {
             val dsp = Paint()
-            if(invSlotTextSize == null) System.err.println("paint initialization error")
+            dsp.textAlign = Paint.Align.CENTER
+            if(invSlotTextSize == null) {
+                if (BuildConfig.DEBUG) require(false)
+            }
             else dsp.textSize = invSlotTextSize as Float
             FontFallback.Static.paints(dsp)
         }
@@ -60,7 +63,8 @@ open class InventorySlot(context: Context?, attrs: AttributeSet?) : View(context
         super.onDraw(canvas)
         val occ = occupant ?: return //capture occupant (for thread safety)
         val p = dragPaints()[occ.fontIndex]
-        canvas?.drawText(occ.asString, scaleOffsetPx,canvas.height - p.descent() - scaleOffsetPx, p)
+        canvas?.let { drawCharacter(occ, p, canvas) }
+        //canvas?.drawText(occ.asString, scaleOffsetPx,canvas.height - p.descent() - scaleOffsetPx, p)
     }
 
     var scaleOffsetPx = 0f

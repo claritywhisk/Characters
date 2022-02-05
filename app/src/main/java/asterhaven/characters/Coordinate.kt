@@ -1,6 +1,5 @@
 package asterhaven.characters
 
-import asterhaven.characters.BuildConfig
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
@@ -17,16 +16,12 @@ data class Coordinate private constructor(
         fun create(scriptDims : DoubleArray) : Coordinate {
             val sigmaDims = scriptDims.fold(0.0) {acc, dim -> acc + dim}
             var unicodeCharacter : UnicodeCharacter? = null
-            for(index in scriptDims.indices){
-                if (Random.nextDouble() < scriptDims[index]) {
+            for(si in scriptDims.indices){
+                if (Random.nextDouble() < scriptDims[si]) {
                     if(unicodeCharacter != null){
                         return Coordinate(scriptDims, sigmaDims, Terrain.CLOUD, null)
                     }
-                    val script = Universe.allScripts[index]
-                    val randCharI = Random.nextInt(script.size)
-                    val codePoint = script.codePointOfMemberAt(randCharI)
-                    val char = String(intArrayOf(codePoint), 0, 1)
-                    unicodeCharacter = UnicodeCharacter(char, script)
+                    unicodeCharacter = UnicodeCharacter.create(si)
                 }
             }
             return Coordinate(scriptDims, sigmaDims, null, unicodeCharacter)

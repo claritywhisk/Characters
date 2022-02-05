@@ -3,9 +3,10 @@ package asterhaven.characters
 import android.view.View
 import kotlin.system.measureTimeMillis
 
+const val FRESH_PROGRESS = false
 const val MUTE = true
 
-const val CHAOS : Double = .0005 //upper bound of test random
+const val CHAOS : Double = .0006 //upper bound of test random
 
 //worldview speed
 const val A = 1.3f//1f //(tiles/second)/second
@@ -17,11 +18,15 @@ const val SELECTED_TIME = 3500L
 //general glyph border
 const val SCALE_TEXT2TILE = .75f
 
+const val SAVE_EVERY = 15000L
+const val SLEEP_DELAY = 1800L
+
 //magic walking factors
 const val BLANK_QUO_CAP = 0.95 //todo
-const val PROPORTION_TILE = 0.35
-const val PROPORTION_INTENT = 0.01
-const val PROPORTION_UNIVERSE = .64
+const val PROPORTION_TILE = 0.4
+const val PROPORTION_INTENT = 0.0//0.05
+const val PROPORTION_UNIVERSE = 0.5
+const val PROPORTION_INVENTORY = 0.1
 
 //@RequiresApi(Build.VERSION_CODES.N)
 fun randomBreathableCoordinateForCenterTEST() =
