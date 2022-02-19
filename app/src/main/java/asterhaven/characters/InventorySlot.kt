@@ -67,10 +67,10 @@ open class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersVi
         //canvas?.drawText(occ.asString, scaleOffsetPx,canvas.height - p.descent() - scaleOffsetPx, p)
     }
 
-    var scaleOffsetPx = 0f
+    //var scaleOffsetPx = 0f
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        scaleOffsetPx = w * (1f - SCALE_TEXT2TILE)/2f
+        //scaleOffsetPx = w * (1f - SCALE_TEXT2TILE)/2f
         invSlotTextSize = (w * SCALE_TEXT2TILE).roundToInt().toFloat()
         invSlotDragShadowSize = w * DragStarter.SHRINK_FACTOR * SCALE_TEXT2TILE
     }

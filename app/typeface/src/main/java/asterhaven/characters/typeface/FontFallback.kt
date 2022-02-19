@@ -3,6 +3,7 @@ package asterhaven.characters.typeface
 import android.content.Context
 import android.graphics.*
 import androidx.core.content.res.ResourcesCompat
+import java.util.*
 
 class FontFallback private constructor(applicationContext : Context) {
     enum class Font {

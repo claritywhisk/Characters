@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "537970890959",
+    "project_id": "characters-explorer",
+    "storage_bucket": "characters-explorer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:537970890959:android:2904c7fd9fdb905dafbfba",
+        "android_client_info": {
+          "package_name": "asterhaven.characters"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "537970890959-p20p2hu641jg71us29b15061f0scrkpj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGtTTvALO1egNltRwvWoOpvMrdU7ejpOg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "537970890959-p20p2hu641jg71us29b15061f0scrkpj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

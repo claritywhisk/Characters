@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.databinding.ActivityMainBinding
@@ -26,7 +28,6 @@ class MainActivity : AppCompatActivity() {
 
     private var shortAnimationDuration : Int = 0
 
-    //@RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_Characters)
         super.onCreate(savedInstanceState)
@@ -53,12 +54,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        println("onStop")
-        if(::saveFile.isInitialized) runBlocking {
-            println("please final save")
-            Progress.saveJob(saveFile, progress).join()
-            println("final save")
-        }
+        if(::saveFile.isInitialized) Progress.saveJob(saveFile, progress)
     }
 
     private fun doProgressInit() {
