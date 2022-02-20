@@ -2,8 +2,6 @@ package asterhaven.characters.unicodescript
 
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonNames
-import kotlinx.serialization.json.encodeToJsonElement
 
 fun decodeAllUS(str : String) : List<UnicodeScript> = Json.decodeFromString(str)
 fun encodeAllUS(list : List<UnicodeScript>) : String = Json.encodeToString(list)
