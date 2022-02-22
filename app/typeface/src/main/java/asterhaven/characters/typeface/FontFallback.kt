@@ -3,6 +3,7 @@ package asterhaven.characters.typeface
 import android.content.Context
 import android.graphics.*
 import androidx.core.content.res.ResourcesCompat
+import java.lang.IllegalStateException
 import java.util.*
 
 class FontFallback private constructor(applicationContext : Context) {
@@ -48,8 +49,9 @@ class FontFallback private constructor(applicationContext : Context) {
         private fun font(c : String) : Font {
             for(f in Font.values()) if(hasGlyph(f, c)) return f
             //-------------------------------------------------
-            System.err.println("Cannot display: \n$c ${c.codePointAt(0).toString(16).toUpperCase()}")
-            if(BuildConfig.DEBUG) check(false)
+            val msg = "Cannot display: \n$c ${c.codePointAt(0).toString(16).uppercase()}"
+            System.err.println(msg)
+            if(BuildConfig.DEBUG) throw IllegalStateException(msg)
             return Font.SYSTEM_SEVERAL
         }
     }

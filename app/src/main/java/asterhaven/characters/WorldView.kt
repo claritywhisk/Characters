@@ -5,14 +5,11 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.View
 import asterhaven.characters.typeface.FontFallback
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
-import java.lang.Thread.currentThread
 import java.util.*
 import kotlin.system.measureTimeMillis
 
@@ -33,7 +30,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
 
     private val paints by lazy {
         val p = Paint()
-        //style settings here
+        p.textAlign = Paint.Align.CENTER
         FontFallback.Static.paints(p)
     }
     private val selectedLocs = LinkedList<Coordinate>()
@@ -76,9 +73,14 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         }
     }
 
-    var tileWidthPx = 0f
+    private var tileWidthPx = 0f
+        set(v) {
+            halfTileWidthPx = v / 2f
+            field = v
+        }
+    private var halfTileWidthPx = 0f
     private var offsetPx = 0f //gap side of screen
-    private var scaleOffsetPx = 0f //gap from shrunk centered text
+    //private var scaleOffsetPx = 0f //gap from shrunk centered text
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -88,42 +90,38 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
             selectedLocs.poll()
             selectedLocColor.poll()
         }
-        //Offset to first visible tile's character
-        val textXOffset = offsetPx + scaleOffsetPx
-        val textYOffset = tileWidthPx - offsetPx - scaleOffsetPx - paints[0].descent()
-        //todo standardize central character placement w/ CharactersView or verify this is same with Paint.Align.LEFT
-        var x = textXOffset - walk.xOffset * tileWidthPx - tileWidthPx
-        var y : Float
         //some drawing offscreen or partial glyphs
+        var x = -walk.xOffset * tileWidthPx - halfTileWidthPx + offsetPx
+        var y : Float
         for (i in LOCAL_RANGE){
-            y = textYOffset - walk.yOffset * tileWidthPx - tileWidthPx
+            y = -walk.yOffset * tileWidthPx - halfTileWidthPx
             for(j in LOCAL_RANGE){
                 val loc = computedMap[i][j].coordinate()
-                val cornX = x - textXOffset
-                val cornY = y - textYOffset
-                when(loc.terrain){
-                    Terrain.CLOUD ->
-                        drawTileColor(canvas, cornX, cornY, R.color.gray_400)
-                }
                 if(loc in selectedLocs){//note: uses equals(), overridden
                     val shade = selectedLocColor.elementAt(selectedLocs.indexOf(loc)).animatedValue as Int
-                    drawTileColor(canvas, cornX, cornY, shade)
+                    drawTileColor(canvas, x, y, shade)
                 }
-                val c = loc.unicodeCharacter
-                if(c != null) {
-                    val paint = paints[c.fontIndex]
-                    canvas?.drawText(c.asString, x, y, paint) //draw with right font
-                    if(i in VISIBLE_RANGE && j in VISIBLE_RANGE) see(c)
+                when(loc.terrain){
+                    Terrain.CLOUD ->
+                        drawTileColor(canvas, x, y, R.color.gray_400)
+                    null -> loc.unicodeCharacter?.let { c ->
+                        val paint = paints[c.fontIndex]
+                        canvas?.let { can ->
+                            drawCharacter(c, paint, can, x, y)
+                            if (i in VISIBLE_RANGE && j in VISIBLE_RANGE) see(c)
+                        }
+                    }
                 }
                 y += tileWidthPx
             }
             x += tileWidthPx
         }
     }
-    val dtcPaint = Paint()
-    private fun drawTileColor(canvas: Canvas?, cornX : Float, cornY : Float, color : Int){
+    private val dtcPaint = Paint()
+    private fun drawTileColor(canvas: Canvas?, x : Float, y : Float, color : Int){
         dtcPaint.color = color
-        canvas?.drawRect(cornX, cornY, cornX + tileWidthPx, cornY + tileWidthPx, dtcPaint)
+        canvas?.drawRect(x - halfTileWidthPx, y - halfTileWidthPx,
+                        x + halfTileWidthPx, y + halfTileWidthPx, dtcPaint)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -131,13 +129,13 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         if(w != h && BuildConfig.DEBUG) logToTextView("debug: unexpected wv size $w $h", this)
         tileWidthPx = w * 1f / SIDE_LENGTH
         offsetPx = (w % tileWidthPx) / 2f
-        scaleOffsetPx = tileWidthPx * (1f - SCALE_TEXT2TILE) / 2f
+        //scaleOffsetPx = tileWidthPx * (1f - SCALE_TEXT2TILE) / 2f
         paints.forEach {
             it.textSize = (tileWidthPx * SCALE_TEXT2TILE) //.roundToInt().toFloat()
         }
     }
 
-    val gestureDetector = GestureApparatus.forWV(getContext(),this)
+    private val gestureDetector = GestureApparatus.forWV(getContext(),this)
     override fun onTouchEvent(event: MotionEvent): Boolean {
         gestureDetector.onTouchEvent(event)
         return true //https://stackoverflow.com/a/23725322/2563422
@@ -170,15 +168,13 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         val dTilesY = tileY - EXTENDED_MAP_SIZE/2
         walk.to(dTilesX, dTilesY)
     }
-    private fun isAlreadyGoingAnim(coord : Coordinate, freshAnim : ValueAnimator) : Boolean {
-        return when (val i = selectedLocs.indexOf(coord)) {
-            -1 -> false
-            else -> {
-                selectedLocColor[i] = freshAnim
-                true
-            }
-        }
+    private fun isAlreadyGoingAnim(coord : Coordinate, freshAnim : ValueAnimator): Boolean {
+        val i = selectedLocs.indexOf(coord)
+        if(i == -1) return false
+        selectedLocColor[i] = freshAnim
+        return true
     }
+
     fun doInit(){
         movement = Movement(this) //like most lines, a must!
         val c = randomBreathableCoordinateForCenterTEST()

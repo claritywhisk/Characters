@@ -64,7 +64,7 @@ class SleepView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         canvas?.let { can ->
             glyphOld?.let { it.draw(can, o)}
             glyphNew?.let { it.draw(can, n)
-                if(n > 192) (it)
+                if(n > 192) see(it)
             }
         }
     }

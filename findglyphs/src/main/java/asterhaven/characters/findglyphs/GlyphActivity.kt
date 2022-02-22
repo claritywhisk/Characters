@@ -7,7 +7,7 @@ import android.icu.lang.UScript
 import android.icu.text.UnicodeSet
 import android.os.Environment
 import androidx.core.app.ActivityCompat
-import asterhaven.characters.typeface.FontFallback.Font.*
+import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.typeface.FontFallback.Static.hasGlyph
 import asterhaven.characters.typeface.FontFallback.Static.loadTypefaces
 import asterhaven.characters.unicodescript.UnicodeScript
@@ -25,11 +25,10 @@ private const val expected = 199
  */
 
 class GlyphActivity : AppCompatActivity() {
+    var testValue = 0x115FA
     private fun glyph(file: File){
         val fast = false //Turn on to skip the Unknown script (87% of codepoints, < 1/6 of glyphs)
         var uSize = 0
-        var gCount = 0
-        var fellback = 0
         var strings = false
         val list = ArrayList<UnicodeScript>()
         for(properTea in UScript::class.staticProperties) {
@@ -40,22 +39,26 @@ class GlyphActivity : AppCompatActivity() {
             script.freeze()
             uSize += script.size()
             var gly = 0
-            var fel = 0
             val usableScript = UnicodeSet()
-            script.forEach {
-                if((gly + fel) % 2500 == 0) println(".")
-                if(hasGlyph(GNU_UNIFONT, it) || hasGlyph(GUN_UNIFONT_UPPER, it)){ //todo hardcoded
-                    usableScript.add(it.codePointAt(0))
+            var progInd = 0
+            script.forEach { Ꭿ ->
+                if(progInd++ % 10000 == 0) println(".")
+                if(FontFallback.Font.values().any{ hasGlyph(it, Ꭿ) }) {
+                    usableScript.add(Ꭿ.codePointAt(0))
                     gly++
+                    if(Ꭿ.codePointAt(0) == testValue){
+                        println("Test value added")
+                        for(f in FontFallback.Font.values()) println(hasGlyph(f, Ꭿ))
+                    }
                 }
-                else if(hasGlyph(SYSTEM_SEVERAL, it)) fel++ //if there were any, should add them too
+                if(Ꭿ.codePointAt(0) == testValue){
+                    println("(Test value found)")
+                }
             }
             println()
             usableScript.compact()
             if(!usableScript.isEmpty)
                 list.add(createUnicodeScript(usableScript, UScript.getName(properTea.get() as Int)))
-            gCount += gly
-            //fellback += fel
             val coverage = gly.toDouble() / script.size()
             println(UScript.getName(properTea.get() as Int))
             println("\t${script.size()} chars")
@@ -68,7 +71,6 @@ class GlyphActivity : AppCompatActivity() {
                     }
                 }"
             )
-            if(fel > 0) println("*!*$fel found by vanillaPaint not added!")
             if(!script.strings().isEmpty()) {
                 println("Unexpected script.strings")
                 strings = true
@@ -87,10 +89,8 @@ class GlyphActivity : AppCompatActivity() {
             file.writeText(json)
         }
         println(" to JSON in ${"%.3f".format(t.toDouble() / 1000)} s")
-        println("Unicode codepoints examined: ${uSize}")
-        println("Unifont14 has ${gCount} Glyphs")
+        println("Unicode codepoints examined: $uSize")
         if(fast) println("skipped Unknown")
-        println("Default Paint caught $fellback characters")
         val size = UScript::class.staticProperties.size
         if(size != expected)
             println("ERROR: ANDROID.ICU.LANG.USCRIPT CHANGED \n $size from $expected")
