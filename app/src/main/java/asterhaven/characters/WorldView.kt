@@ -18,20 +18,20 @@ const val SIDE_LENGTH_EXTENDED = SIDE_LENGTH + 2
 private val LOCAL_RANGE = 1..SIDE_LENGTH_EXTENDED
 private val VISIBLE_RANGE = 2..(SIDE_LENGTH + 1)
 
-class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(context, attrs), DragStarter {
+class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(context, attrs) {
     companion object { init { require(SIDE_LENGTH % 2 == 1) } }//todo
 
     private val walk = Walk(this) //contains px offsets from current center
     lateinit var movement : Movement
 
-    //DragStarter rabbit droppings
-    override fun dragShadowSize() = DragStarter.ENLARGE_FACTOR * SCALE_TEXT2TILE * tileWidthPx
-    override fun dragPaints(): Array<Paint> = InventorySlot.invSlotPaints
+    override val dragShadowSize by lazy {
+        ENLARGE_FACTOR * SCALE_TEXT2TILE * tileWidthPx
+    }
 
     private val paints by lazy {
         val p = Paint()
         p.textAlign = Paint.Align.CENTER
-        FontFallback.Static.paints(p)
+        FontFallback.paints(p)
     }
     private val selectedLocs = LinkedList<Coordinate>()
     private val selectedLocColor = LinkedList<ValueAnimator>()

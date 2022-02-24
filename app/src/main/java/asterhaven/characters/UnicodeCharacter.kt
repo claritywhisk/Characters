@@ -18,12 +18,18 @@ data class UnicodeCharacter private constructor(
         fun create(scriptI : Int, charI : Int) = create(Universe.allScripts[scriptI], charI)
         private fun create(s : UnicodeScript, i : Int) = UnicodeCharacter(s.charAt(i), s, i)
     }
+    init {
+        if(FontFallback.Font.values().none { FontFallback.hasGlyph(it, asString)})
+            throw RuntimeException("Bad character: $asString ${
+                asString.codePointAt(0).toString(16).uppercase()
+            }")
+    }
     override fun toString(): String {
         return "${script.name} $asString ${hex()}"
     }
     fun hex() = asString.codePointAt(0).toString(16).uppercase()
     fun scriptIndex() = Universe.indexOfScript[script]!!
     val fontIndex by lazy {
-        FontFallback.Static.fontIndexForCharacter(asString)
+        FontFallback.fontIndexForCharacter(asString)
     }
 }

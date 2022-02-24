@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
         CoroutineScope(Dispatchers.IO).launch {
-            FontFallback.Static.loadTypefaces(applicationContext)
+            FontFallback.loadTypefaces(applicationContext)
             timeTV("readAllUS", binding.worldView) { Universe.readAllUS(resources) }
             CoroutineScope(Dispatchers.Main).launch {
                 doProgressInit()

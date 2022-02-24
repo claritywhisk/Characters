@@ -8,8 +8,8 @@ import android.icu.text.UnicodeSet
 import android.os.Environment
 import androidx.core.app.ActivityCompat
 import asterhaven.characters.typeface.FontFallback
-import asterhaven.characters.typeface.FontFallback.Static.hasGlyph
-import asterhaven.characters.typeface.FontFallback.Static.loadTypefaces
+import asterhaven.characters.typeface.FontFallback.hasGlyph
+import asterhaven.characters.typeface.FontFallback.Font
 import asterhaven.characters.unicodescript.UnicodeScript
 import asterhaven.characters.unicodescript.encodeAllUS
 import java.io.File
@@ -25,7 +25,7 @@ private const val expected = 199
  */
 
 class GlyphActivity : AppCompatActivity() {
-    var testValue = 0x115FA
+    var testValues = intArrayOf()
     private fun glyph(file: File){
         val fast = false //Turn on to skip the Unknown script (87% of codepoints, < 1/6 of glyphs)
         var uSize = 0
@@ -43,16 +43,16 @@ class GlyphActivity : AppCompatActivity() {
             var progInd = 0
             script.forEach { Ꭿ ->
                 if(progInd++ % 10000 == 0) println(".")
-                if(FontFallback.Font.values().any{ hasGlyph(it, Ꭿ) }) {
+                if(Font.values().any{ hasGlyph(it, Ꭿ) }) {
                     usableScript.add(Ꭿ.codePointAt(0))
                     gly++
-                    if(Ꭿ.codePointAt(0) == testValue){
-                        println("Test value added")
-                        for(f in FontFallback.Font.values()) println(hasGlyph(f, Ꭿ))
+                    if(Ꭿ.codePointAt(0) in testValues){
+                        println("Test value ${Ꭿ.codePointAt(0).toString(16)} added")
+                        for(f in Font.values()) println(f.name + " " + hasGlyph(f, Ꭿ))
                     }
                 }
-                if(Ꭿ.codePointAt(0) == testValue){
-                    println("(Test value found)")
+                if(Ꭿ.codePointAt(0) in testValues){
+                    println("(Test value ${Ꭿ.codePointAt(0).toString(16)} found)")
                 }
             }
             println()
@@ -108,7 +108,7 @@ class GlyphActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        loadTypefaces(applicationContext)
+        FontFallback.loadTypefaces(applicationContext)
 
         ActivityCompat.requestPermissions(this,
             arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),

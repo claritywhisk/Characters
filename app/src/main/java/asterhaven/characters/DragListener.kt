@@ -5,9 +5,12 @@ import android.view.DragEvent
 import android.view.View
 
 interface DragListener {
+    companion object {
+        var beingDragged : UnicodeCharacter? = null //a little suspicious but fine
+    }
     //abstract properties
     var occupant : UnicodeCharacter?
-    var destination : DragListener?
+    fun destination() : DragListener?
     var formerOccupantSentToDrag : UnicodeCharacter?
     //@RequiresApi(Build.VERSION_CODES.N)
     fun setOnDragListener() {
@@ -36,12 +39,11 @@ interface DragListener {
                 }
                 DragEvent.ACTION_DROP -> {
                     var consume = true
-                    val dropped =
-                        DragStarter.beingDragged//event.clipData.getItemAt(0).text.toString()
-                    DragStarter.beingDragged = null
+                    val dropped = beingDragged//event.clipData.getItemAt(0).text.toString()
+                    beingDragged = null
                     if (this.occupant == null) this.occupant = dropped
                     else {
-                        val n = destination
+                        val n = destination()
                         if (n == null) {
                             println("Inventory Full")
                             consume = false

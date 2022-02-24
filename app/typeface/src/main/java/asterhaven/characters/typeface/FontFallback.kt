@@ -6,53 +6,40 @@ import androidx.core.content.res.ResourcesCompat
 import java.lang.IllegalStateException
 import java.util.*
 
-class FontFallback private constructor(applicationContext : Context) {
-    enum class Font {
-        SYSTEM_SEVERAL,
-        GNU_UNIFONT,
-        GUN_UNIFONT_UPPER
+object FontFallback {
+    enum class Font(val typefaceResource : Int?){
+        SYSTEM_SEVERAL(null),
+        GNU_UNIFONT(R.font.unifont14),
+        GUN_UNIFONT_UPPER(R.font.unifont_upper14)
     }
 
-    private val paintVanilla = Paint()
-    private val paintUnifont = Paint()
-    private val paintUUpper = Paint()
-    private val typefaceUnifont = ResourcesCompat.getFont(applicationContext, R.font.unifont14)!!
-    private val typefaceUpper = ResourcesCompat.getFont(applicationContext, R.font.unifont_upper14)
-    init {
-        paintUnifont.typeface = typefaceUnifont
-        paintUUpper.typeface = typefaceUpper
-    }
-
-    object Static {
-        lateinit var instance: FontFallback //angry pattern
-        fun loadTypefaces(context : Context){
-            instance = FontFallback(context)
-        }
-
-        //workaround for custom font fallback where we *prefer* default paint behavior
-        fun paints(style : Paint) : Array<Paint> = Array(Font.values().size){
-            val p = Paint(style) //copy settings provided
-            when(it){
-                Font.GNU_UNIFONT.ordinal -> p.typeface = instance.typefaceUnifont
+    lateinit var paints : Array<Paint>
+    fun loadTypefaces(context : Context){
+        paints = Array(Font.values().size) { i ->
+            val p = Paint()
+            val f = Font.values()[i]
+            f.typefaceResource?.let {
+                p.typeface = ResourcesCompat.getFont(context, it)!!
             }
             p
         }
+    }
 
-        fun hasGlyph(f : Font, c : String) = when(f){
-            Font.SYSTEM_SEVERAL -> instance.paintVanilla
-            Font.GNU_UNIFONT -> instance.paintUnifont
-            Font.GUN_UNIFONT_UPPER -> instance.paintUUpper
-        }.hasGlyph(c)
+    fun paints(style : Paint) : Array<Paint> = Array(Font.values().size){ i ->
+        val p = Paint(style) //copy settings provided
+        p.typeface = paints[i].typeface
+        p
+    }
 
+    fun hasGlyph(f : Font, c : String) = paints[f.ordinal].hasGlyph(c)
 
-        fun fontIndexForCharacter(c : String) = font(c).ordinal
-        private fun font(c : String) : Font {
-            for(f in Font.values()) if(hasGlyph(f, c)) return f
-            //-------------------------------------------------
-            val msg = "Cannot display: \n$c ${c.codePointAt(0).toString(16).uppercase()}"
-            System.err.println(msg)
-            if(BuildConfig.DEBUG) throw IllegalStateException(msg)
-            return Font.SYSTEM_SEVERAL
-        }
+    fun fontIndexForCharacter(c : String) : Int {
+        //prefer earlier listed in our enum (such as system default) fonts
+        for(f in Font.values()) if(hasGlyph(f, c)) return f.ordinal
+        //-------------------------------------------------
+        val msg = "Cannot display: \n$c ${c.codePointAt(0).toString(16).uppercase()}"
+        System.err.println(msg)
+        if(BuildConfig.DEBUG) throw IllegalStateException(msg)
+        return Font.SYSTEM_SEVERAL.ordinal
     }
 }

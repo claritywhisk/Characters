@@ -26,6 +26,8 @@ class SleepView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
     private val progress : Progress
         get() = (context as MainActivity).progress
 
+    override val dragShadowSize = 0f
+
     init {
         oldAlpha.startDelay = SLEEP_DELAY
         oldAlpha.doOnStart {
@@ -44,7 +46,7 @@ class SleepView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
     private val paints by lazy {
         val p = Paint()
         p.textAlign = Paint.Align.CENTER
-        FontFallback.Static.paints(p)
+        FontFallback.paints(p)
     }
 
     fun sleep() {

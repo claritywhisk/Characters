@@ -9,7 +9,7 @@ class RefuseView(context: Context?, attrs: AttributeSet?) : AppCompatImageView(c
     override var occupant : UnicodeCharacter? = null
         set(_) {} //infinitely empty recycle bin
     override var formerOccupantSentToDrag: UnicodeCharacter? = null //DragListener had bad design
-    override var destination : DragListener? = this
+    override fun destination() = this
     init {
         this.setOnDragListener()
     }
