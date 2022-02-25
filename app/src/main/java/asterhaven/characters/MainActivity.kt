@@ -41,6 +41,19 @@ class MainActivity : AppCompatActivity() {
             CoroutineScope(Dispatchers.Main).launch {
                 doProgressInit()
                 binding.worldView.doInit()
+                CoroutineScope(Dispatchers.Default).launch {
+                    var x = 0
+                    Universe.allScripts.forEachIndexed { i, it ->
+                        println(it.name)
+                        println()
+                        for(j in 0 until it.size){
+                            x++
+                            print(UnicodeCharacter.create(i, j).asString)
+                        }
+                        println()
+                    }
+                    println("*** Completed $x")
+                }
             }
         }
         CoroutineScope(Dispatchers.Default).launch {

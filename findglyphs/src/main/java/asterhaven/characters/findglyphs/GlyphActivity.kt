@@ -25,7 +25,7 @@ private const val expected = 199
  */
 
 class GlyphActivity : AppCompatActivity() {
-    var testValues = intArrayOf()
+    var testValues = intArrayOf(0x11265, 0x16B5A, 0x16ACA, 0x10EAA)
     private fun glyph(file: File){
         val fast = false //Turn on to skip the Unknown script (87% of codepoints, < 1/6 of glyphs)
         var uSize = 0
@@ -42,7 +42,7 @@ class GlyphActivity : AppCompatActivity() {
             val usableScript = UnicodeSet()
             var progInd = 0
             script.forEach { Ꭿ ->
-                if(progInd++ % 10000 == 0) println(".")
+                if(progInd++ % 25000 == 0) print(".")
                 if(Font.values().any{ hasGlyph(it, Ꭿ) }) {
                     usableScript.add(Ꭿ.codePointAt(0))
                     gly++
@@ -90,6 +90,7 @@ class GlyphActivity : AppCompatActivity() {
         }
         println(" to JSON in ${"%.3f".format(t.toDouble() / 1000)} s")
         println("Unicode codepoints examined: $uSize")
+        println("Glyphs found: ${list.fold(0){ sum, script -> sum + script.size}}")
         if(fast) println("skipped Unknown")
         val size = UScript::class.staticProperties.size
         if(size != expected)
@@ -100,6 +101,9 @@ class GlyphActivity : AppCompatActivity() {
     private fun createUnicodeScript(uSet: UnicodeSet, name: String) : UnicodeScript {
         val pairs = StringBuilder(uSet.rangeCount * 2)
         for(range in uSet.ranges()) {
+            for(tv in testValues) if(tv in range.codepoint..range.codepointEnd){
+                println("Test value ${tv.toString(16)} included in $name")
+            }
             pairs.append(String(intArrayOf(range.codepoint, range.codepointEnd), 0, 2))
         }
         return UnicodeScript(name, pairs.toString())

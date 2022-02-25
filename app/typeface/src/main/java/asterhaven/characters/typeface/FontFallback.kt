@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.*
 import androidx.core.content.res.ResourcesCompat
 import java.lang.IllegalStateException
-import java.util.*
 
 object FontFallback {
     enum class Font(val typefaceResource : Int?){
@@ -13,7 +12,7 @@ object FontFallback {
         GUN_UNIFONT_UPPER(R.font.unifont_upper14)
     }
 
-    lateinit var paints : Array<Paint>
+    private lateinit var paints : Array<Paint>
     fun loadTypefaces(context : Context){
         paints = Array(Font.values().size) { i ->
             val p = Paint()

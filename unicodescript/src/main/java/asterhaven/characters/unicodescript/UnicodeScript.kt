@@ -2,40 +2,43 @@ package asterhaven.characters.unicodescript
 
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
+import java.lang.IllegalStateException
 
 fun decodeAllUS(str : String) : List<UnicodeScript> = Json.decodeFromString(str)
 fun encodeAllUS(list : List<UnicodeScript>) : String = Json.encodeToString(list)
 
+var testValues = intArrayOf(0x11265, 0x16B5A, 0x16ACA, 0x10EAA, 0xDF2A4, 0x61)
+
 @Serializable
 data class UnicodeScript(val name : String, private val ranges : String){
-    @Transient val size : Int = {
+    @Transient val size : Int = run {
         var s = 0
-        rangeIterate { _, _, c -> s += c }
+        rangeIterate { _, count -> s += count }
         s
-    }.invoke()
+    }
 
     fun charAt(pos : Int) : String {
         require(pos >= 0)
         require(pos < size)
-        var codepoint = pos
-        rangeIterate { first, _, c ->
-            if(codepoint + 1 > c) codepoint -= c
-            else {
-                codepoint += first
-                return@rangeIterate
-            }
+        var remaining = pos + 1
+        rangeIterate { first, count ->
+            if(remaining > count) remaining -= count
+            else return String(intArrayOf(first + remaining - 1), 0, 1)
         }
-        return String(intArrayOf(codepoint), 0, 1)
+        throw IllegalStateException("UnicodeScript.charAt error")
+        //return ranges[0].toString()
     }
 
-    private fun rangeIterate(f : (Int, Int, Int) -> Unit) {
+    private inline fun rangeIterate(f : (Int, Int) -> Unit) {
         val iterator = ranges.codePoints().iterator()
         while(iterator.hasNext()) {
             val first = iterator.nextInt()
             val second = iterator.nextInt()
-            if(63736 in first..second) println("*****\n$this") //TODO FULL SWEEP
+            /*for(tv in testValues) if(tv in first..second) {
+                println("Test value ${tv.toString(16)} spotted in $name")
+            }*/
             val count = second - first + 1
-            f(first, second, count)
+            f(first, count)
         }
     }
 
