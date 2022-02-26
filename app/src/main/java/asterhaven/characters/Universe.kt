@@ -15,5 +15,6 @@ object Universe {
         java.util.Arrays.sort(allScripts, compareBy { it.name })
         for(i in allScripts.indices) ios[allScripts[i]] = i
         indexOfScript = ios
+        if(BuildConfig.DEBUG) println("${allScripts.size} scripts")
     }
 }

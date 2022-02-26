@@ -21,7 +21,9 @@ import kotlin.system.measureTimeMillis
 private const val expected = 199
 
 /*
-    Unifont14 with "Upper" has 85921 glyphs.
+    Unicode codepoints examined: 1114112
+    Glyphs found: 84932
+    Scripts: 157
  */
 
 class GlyphActivity : AppCompatActivity() {
@@ -31,10 +33,15 @@ class GlyphActivity : AppCompatActivity() {
         var uSize = 0
         var strings = false
         val list = ArrayList<UnicodeScript>()
+        val seen = HashSet<Int>()
         for(properTea in UScript::class.staticProperties) {
             if(properTea.name == "INVALID_CODE") continue
             if(fast && properTea.name == "UNKNOWN") continue
-            val scriptProperty = UScript.getShortName(properTea.get() as Int)
+            val code = properTea.get() as Int
+            //otherwise two copies of Canadian_Aboriginal, Miao, Merotic, Khudawadi, Mandaic, others
+            if(seen.contains(code)) continue
+            seen.add(code)
+            val scriptProperty = UScript.getShortName(code)
             val script = UnicodeSet("[:${scriptProperty}:]")
             script.freeze()
             uSize += script.size()
@@ -42,7 +49,7 @@ class GlyphActivity : AppCompatActivity() {
             val usableScript = UnicodeSet()
             var progInd = 0
             script.forEach { Ꭿ ->
-                if(progInd++ % 25000 == 0) print(".")
+                if(progInd++ % 40000 == 0) println(".")
                 if(Font.values().any{ hasGlyph(it, Ꭿ) }) {
                     usableScript.add(Ꭿ.codePointAt(0))
                     gly++
@@ -52,7 +59,7 @@ class GlyphActivity : AppCompatActivity() {
                     }
                 }
                 if(Ꭿ.codePointAt(0) in testValues){
-                    println("(Test value ${Ꭿ.codePointAt(0).toString(16)} found)")
+                    println("(Test value ${Ꭿ.codePointAt(0).toString(16)} exists)")
                 }
             }
             println()
@@ -91,6 +98,7 @@ class GlyphActivity : AppCompatActivity() {
         println(" to JSON in ${"%.3f".format(t.toDouble() / 1000)} s")
         println("Unicode codepoints examined: $uSize")
         println("Glyphs found: ${list.fold(0){ sum, script -> sum + script.size}}")
+        println("Scripts: ${list.size}")
         if(fast) println("skipped Unknown")
         val size = UScript::class.staticProperties.size
         if(size != expected)
