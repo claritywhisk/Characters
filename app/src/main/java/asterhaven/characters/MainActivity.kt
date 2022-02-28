@@ -15,6 +15,7 @@ import asterhaven.characters.databinding.InventoryBinding
 import kotlinx.coroutines.*
 import java.io.File
 import kotlin.concurrent.fixedRateTimer
+import kotlin.math.max
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -41,19 +42,22 @@ class MainActivity : AppCompatActivity() {
             CoroutineScope(Dispatchers.Main).launch {
                 doProgressInit()
                 binding.worldView.doInit()
-                CoroutineScope(Dispatchers.Default).launch {
+                /*CoroutineScope(Dispatchers.Default).launch {
                     var x = 0
+                    var width = 0
                     Universe.allScripts.forEachIndexed { i, it ->
                         println(it.name)
                         println()
                         for(j in 0 until it.size){
                             x++
-                            print(UnicodeCharacter.create(i, j).asString)
+                            val c = UnicodeCharacter.create(i, j)
+
                         }
                         println()
                     }
                     println("*** Completed $x")
-                }
+                    //println("*** $width ")
+                }*/
             }
         }
         CoroutineScope(Dispatchers.Default).launch {
