@@ -21,6 +21,8 @@ const val SCALE_TEXT2TILE = .75f
 const val SAVE_EVERY = 15000L
 const val SLEEP_DELAY = 1800L
 
+const val WIDTH_TEXT_SIZE_RATIO = 2.5f
+
 //magic walking factors
 const val BLANK_QUO_CAP = 0.95 //todo
 const val PROPORTION_TILE = 0.4

@@ -3,7 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/publi/AndroidStudioProjects/Characters/app/src/main/res/drawable/inventory_border_outer.xml" value="0.2115" />
+        <entry key="..\:/Users/publi/AndroidStudioProjects/Characters/app/src/main/res/drawable/inventory_border_slot.xml" value="0.2115" />
         <entry key="..\:/Users/publi/AndroidStudioProjects/Characters/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/Users/publi/AndroidStudioProjects/Characters/app/src/main/res/layout/inventory.xml" value="0.20199275362318841" />
       </map>
     </option>
   </component>

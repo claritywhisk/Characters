@@ -3,7 +3,7 @@
     android:id="@+id/invTable"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#00000000">
+    android:background="@drawable/inventory_border_outer">
 
     <TableRow
         android:layout_weight="1"
@@ -13,13 +13,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="#00000000" />
+            android:background="@drawable/inventory_border_slot" />
 
         <asterhaven.characters.InventorySlot
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="#00000000" />
+            android:background="@drawable/inventory_border_slot" />
 
     </TableRow>
 
@@ -31,12 +31,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="#00000000" />
+            android:background="@drawable/inventory_border_slot" />
 
         <asterhaven.characters.InventorySlot
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="#00000000" />
+            android:background="@drawable/inventory_border_slot" />
     </TableRow>
 </TableLayout>

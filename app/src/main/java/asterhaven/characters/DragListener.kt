@@ -3,6 +3,7 @@ package asterhaven.characters
 import android.graphics.Color
 import android.view.DragEvent
 import android.view.View
+import androidx.core.content.ContextCompat
 
 interface DragListener {
     companion object {
@@ -68,7 +69,7 @@ interface DragListener {
         }
     }
     fun highlight(){
-        (this as View).setBackgroundColor(resources.getColor(R.color.drop_possible_background))
+        (this as View).setBackgroundColor(ContextCompat.getColor(context, R.color.drop_possible_background))
         (this as View).invalidate()
     }
     private fun unHighlight() {

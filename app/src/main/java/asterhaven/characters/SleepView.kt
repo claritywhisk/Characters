@@ -71,9 +71,6 @@ class SleepView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         }
     }
 
-    private var third = 0f
-    private var xOff = 0f
-    private var yOff = 0f
     private fun UnicodeCharacter.draw(canvas : Canvas, alpha : Int){
         val paint = paints[this.fontIndex]
         paint.alpha = alpha
@@ -83,11 +80,8 @@ class SleepView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         if(w != h && BuildConfig.DEBUG) logToTextView("debug: unexpected sv size $w $h", this)
-        third = w / 3f
-        xOff = third
-        yOff = third + third
         paints.forEach {
-            it.textSize = third
+            it.textSize = w / WIDTH_TEXT_SIZE_RATIO
         }
     }
 

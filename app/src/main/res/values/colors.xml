@@ -14,4 +14,5 @@
     <color name="selected_map_tile">#DA00FF90</color>
     <color name="drop_possible_background">#421431A0</color>
     <color name="drop_location_normal_background">#FFFFFF</color>
+    <color name="inventory_lines">#FFBDBDBD</color>
 </resources>

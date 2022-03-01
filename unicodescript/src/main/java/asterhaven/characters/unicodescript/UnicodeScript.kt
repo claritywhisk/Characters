@@ -18,8 +18,9 @@ data class UnicodeScript(val name : String, private val ranges : String){
     }
 
     fun charAt(pos : Int) : String {
-        require(pos >= 0)
-        require(pos < size)
+        if(pos < 0 || pos >= size) {
+            throw IllegalStateException("pos $pos for $name with $size chars")
+        }
         var remaining = pos + 1
         rangeIterate { first, count ->
             if(remaining > count) remaining -= count
