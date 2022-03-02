@@ -8,10 +8,12 @@
 
     <asterhaven.characters.WorldView
         android:id="@+id/world_view"
-        layout="@layout/world_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/inventory"
         app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <asterhaven.characters.SleepView
@@ -28,16 +30,17 @@
         layout="@layout/inventory"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/space"
         app:layout_constraintDimensionRatio="1"
-        app:layout_constraintEnd_toStartOf="@id/scroll"
+        app:layout_constraintEnd_toStartOf="@id/examiner"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/world_view" />
 
     <View
-        android:id="@+id/scroll"
+        android:id="@+id/examiner"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="2:3"
+        app:layout_constraintDimensionRatio="4:3"
         app:layout_constraintEnd_toEndOf="@id/picture"
         app:layout_constraintStart_toEndOf="@+id/inventory"
         app:layout_constraintTop_toBottomOf="@+id/world_view" />
@@ -46,42 +49,63 @@
         android:id="@+id/picture"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/space"
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/scroll"
+        app:layout_constraintStart_toEndOf="@+id/examiner"
         app:layout_constraintTop_toBottomOf="@+id/world_view" />
-
-    <Button
-        android:id="@+id/sleep"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:onClick="sleepButtonClick"
-        android:text="@string/sleep_button"
-        app:layout_constraintBottom_toTopOf="@+id/textView"
-        app:layout_constraintDimensionRatio="1"
-        app:layout_constraintEnd_toStartOf="@+id/scroll"
-        app:layout_constraintStart_toEndOf="@+id/recyclebin"
-        app:layout_constraintTop_toBottomOf="@+id/inventory" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:gravity="bottom"
-        android:scrollbars="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scroll" />
 
     <asterhaven.characters.RefuseView
         android:id="@+id/recyclebin"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:src="@android:drawable/ic_menu_delete"
-        app:layout_constraintBottom_toTopOf="@+id/textView"
         app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toStartOf="@+id/space"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/inventory" />
+        app:layout_constraintTop_toBottomOf="@+id/inventory"
+        app:layout_constraintWidth_percent="0.1667" />
+
+    <Space
+        android:id="@+id/space"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="4"
+        app:layout_constraintEnd_toStartOf="@+id/z"
+        app:layout_constraintStart_toEndOf="@+id/recyclebin"
+        app:layout_constraintWidth_percent="0.6666"
+        tools:layout_editor_absoluteY="648dp" />
+
+    <Button
+        android:id="@+id/z"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:onClick="sleepButtonClick"
+        android:text="@string/sleep_button"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/space"
+        app:layout_constraintTop_toBottomOf="@+id/picture"
+        app:layout_constraintWidth_percent="0.1667" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="0"
+        android:layout_height="0"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/space" />
+
+    <TextView
+        android:id="@+id/hex_label"
+        android:layout_width="0"
+        android:layout_height="0"
+        android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@+id/space"
+        app:layout_constraintEnd_toStartOf="@+id/picture"
+        app:layout_constraintStart_toEndOf="@+id/inventory"
+        app:layout_constraintTop_toBottomOf="@+id/examiner" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

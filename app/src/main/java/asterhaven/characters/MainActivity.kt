@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
             FontFallback.loadTypefaces(applicationContext)
             timeTV("readAllUS", binding.worldView) { Universe.readAllUS(resources) }
             CoroutineScope(Dispatchers.Main).launch {
+                binding.textView.typeface = FontFallback.Font.GNU_UNIFONT.getTypeface() //todo dynamic
                 doProgressInit()
                 binding.worldView.doInit()
                 /*CoroutineScope(Dispatchers.Default).launch {

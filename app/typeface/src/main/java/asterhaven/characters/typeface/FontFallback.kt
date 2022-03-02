@@ -6,10 +6,11 @@ import androidx.core.content.res.ResourcesCompat
 import java.lang.IllegalStateException
 
 object FontFallback {
-    enum class Font(val typefaceResource : Int?){
+    enum class Font(internal val typefaceResource : Int?){
         SYSTEM_SEVERAL(null),
         GNU_UNIFONT(R.font.unifont14),
-        GUN_UNIFONT_UPPER(R.font.unifont_upper14)
+        GUN_UNIFONT_UPPER(R.font.unifont_upper14);
+        fun getTypeface(): Typeface = paints[ordinal].typeface
     }
 
     private lateinit var paints : Array<Paint>
