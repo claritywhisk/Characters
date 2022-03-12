@@ -9,6 +9,7 @@ interface DragListener {
     companion object {
         var beingDragged : UnicodeCharacter? = null //a little suspicious but fine
     }
+
     //abstract properties
     var occupant : UnicodeCharacter?
     fun destination() : DragListener?

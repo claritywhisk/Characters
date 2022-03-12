@@ -17,7 +17,7 @@ abstract class CharactersView(context: Context?, attrs: AttributeSet?) : View(co
         if(x.progressInitialized()) x.progress.see(c)
     }
 
-    val rect = Rect()
+    private val rect = Rect()
     val paintTest by lazy {
         val p = Paint()
         p.color = Color.CYAN
@@ -30,11 +30,11 @@ abstract class CharactersView(context: Context?, attrs: AttributeSet?) : View(co
         drawCharacter(c, paint, canvas, canvas.width / 2f, canvas.height / 2f)
     fun drawCharacter(c : UnicodeCharacter, paint : Paint, canvas : Canvas, x : Float, y : Float) {
         if(BuildConfig.DEBUG) require(paint.textAlign == Paint.Align.CENTER)
-        //val trueY = y - (paint.descent() + paint.ascent())
 
-        val baseline = y - (paint.fontMetrics.bottom + paint.fontMetrics.top) / 2
+        val baseline = y - (paint.descent() + paint.ascent()) / 2
+        //val baseline = y - (paint.fontMetrics.bottom + paint.fontMetrics.top) / 2
 
-        paint.getTextBounds(c.asString,0, 1, rect)
+        paint.getTextBounds(c.asString,0, c.asString.length, rect)
 
         //rect.contains(0,0)) false
 
