@@ -1,15 +1,27 @@
 package asterhaven.characters
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Rect
 import android.util.AttributeSet
 import asterhaven.characters.typeface.FontFallback
-import java.lang.Float.min
 
-class ExaminerView(context: Context?, attrs: AttributeSet?) : CharactersView(context, attrs), DragListener {
-    companion object {
+@SuppressLint("RestrictedApi")
+class ExaminerView(context: Context, attrs: AttributeSet?) : androidx.appcompat.widget.AppCompatTextView(context, attrs), DragListener {
+    override var occupant : UnicodeCharacter? = null
+        set(value) {
+            value?.let {
+                typeface = FontFallback.Font.values()[it.fontIndex].getTypeface()
+                text = value?.asString
+            }
+            field = value
+        }
+    override var formerOccupantSentToDrag: UnicodeCharacter? = null
+    override fun destination() = this
+    init {
+        setOnDragListener()
+    }
+}
+    /*companion object {
         const val FRACTION_NON_LABEL = 3f / 4f
     }
     override var occupant : UnicodeCharacter? = null
@@ -75,5 +87,4 @@ class ExaminerView(context: Context?, attrs: AttributeSet?) : CharactersView(con
                 drawCharacter(occ, paint, can, midX, midGlyY)
             }
         }
-    }
-}
+    }*/
