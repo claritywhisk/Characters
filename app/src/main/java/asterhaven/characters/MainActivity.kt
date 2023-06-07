@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.View.INVISIBLE
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.databinding.ActivityMainBinding
@@ -15,7 +17,6 @@ import asterhaven.characters.databinding.InventoryBinding
 import kotlinx.coroutines.*
 import java.io.File
 import kotlin.concurrent.fixedRateTimer
-import kotlin.math.max
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -68,9 +69,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @OptIn(InternalCoroutinesApi::class)
     override fun onStop() {
         super.onStop()
-        if(::saveFile.isInitialized) Progress.saveJob(saveFile, progress)
+        if(::saveFile.isInitialized){
+            val sj = Progress.saveJob(saveFile, progress)
+            sj.invokeOnCompletion(true) {
+                println("TEST/DEBUG: final save, threw: $it")
+            }
+        }
     }
 
     private fun doProgressInit() {
@@ -100,7 +107,7 @@ class MainActivity : AppCompatActivity() {
         super.onConfigurationChanged(newConfig)
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             this.actionBar?.hide()
-            //TODO display menu in landscape
+            //TODO display menu in landscape, or abolish landscape
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             this.actionBar?.show()
         }
@@ -108,7 +115,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.sound -> {
-            println(item.title)
             if (item.title == resources.getString(R.string.menu_sound_on)) {
                 mediaPlayer.setVolume(0f, 0f)
                 item.title = resources.getString(R.string.menu_sound_off)
@@ -129,10 +135,15 @@ class MainActivity : AppCompatActivity() {
     fun logToTextView(line : String) =
         runOnUiThread { binding.textView.append(line + "\n") }
 
-    fun sleepButtonClick(view : View){
+    fun finishedCircleClick(circleButton : View){
+        //TODO
+        circleButton.visibility = INVISIBLE
+    }
+
+    fun sleepButtonClick(z : View){
         when(binding.worldView.visibility){
             View.VISIBLE -> {
-                if(!::progress.isInitialized) return
+                if(!progressInitialized()) return
                 binding.sleepView.setLocation(binding.worldView.movement.sleepScriptDims())
                 crossfade(binding.worldView, binding.sleepView, false){
                     binding.sleepView.sleep()
@@ -144,7 +155,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
     //https://developer.android.com/training/animation/reveal-or-hide-view#Crossfade
     private fun crossfade(a : View, b : View, beGone : Boolean, onComplete : () -> Unit) {
         b.apply {

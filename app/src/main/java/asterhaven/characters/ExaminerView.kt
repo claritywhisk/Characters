@@ -11,7 +11,7 @@ class ExaminerView(context: Context, attrs: AttributeSet?) : androidx.appcompat.
         set(value) {
             value?.let {
                 typeface = FontFallback.Font.values()[it.fontIndex].getTypeface()
-                text = value?.asString
+                text = it.asString
             }
             field = value
         }

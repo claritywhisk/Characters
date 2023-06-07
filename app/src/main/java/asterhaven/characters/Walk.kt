@@ -11,10 +11,7 @@ class Walk (private val wView : WorldView) : TimeAnimator.TimeListener {
         private const val o = 0f
         private const val T_CRUISE_BEGIN = V_MAX/A
         private val FULLSTOPSTARTDIST = constAccDist(T_CRUISE_BEGIN, A)
-        private fun constAccDist(t : Float, a : Float, v_0 : Float = 0f) : Float {
-            //v = v_0 + at
-            return v_0*t + a*t*t/2f
-        }
+        private fun constAccDist(t : Float, a : Float, v_0 : Float = 0f) = v_0*t + a*t*t/2f
     }
     //displacement from wView.centerCoordinate, up to 1/2 Tile
     var xOffset = o

@@ -1,42 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/invTable"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/inventory_border_outer">
+    android:layout_height="match_parent">
 
-    <TableRow
-        android:layout_weight="1"
-        android:background="#00000000">
+    <TableLayout
+        android:id="@+id/invTable"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/inventory_border_outer">
 
-        <asterhaven.characters.InventorySlot
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <TableRow
             android:layout_weight="1"
-            android:background="@drawable/inventory_border_slot" />
+            android:background="#00000000">
 
-        <asterhaven.characters.InventorySlot
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            <asterhaven.characters.InventorySlot
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/inventory_border_slot" />
+
+            <asterhaven.characters.InventorySlot
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/inventory_border_slot" />
+
+        </TableRow>
+
+        <TableRow
             android:layout_weight="1"
-            android:background="@drawable/inventory_border_slot" />
+            android:background="#00000000">
 
-    </TableRow>
+            <asterhaven.characters.InventorySlot
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/inventory_border_slot" />
 
-    <TableRow
-        android:layout_weight="1"
-        android:background="#00000000">
+            <asterhaven.characters.InventorySlot
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/inventory_border_slot" />
+        </TableRow>
+    </TableLayout>
 
-        <asterhaven.characters.InventorySlot
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/inventory_border_slot" />
-
-        <asterhaven.characters.InventorySlot
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/inventory_border_slot" />
-    </TableRow>
-</TableLayout>
+    <Button
+        android:id="@+id/finished_with_script"
+        android:onClick="finishedCircleClick"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@null"
+        android:visibility="invisible" />`
+</RelativeLayout>

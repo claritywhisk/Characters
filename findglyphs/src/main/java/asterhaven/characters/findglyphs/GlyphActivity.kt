@@ -14,6 +14,9 @@ import asterhaven.characters.unicodescript.UnicodeScript
 import asterhaven.characters.unicodescript.encodeAllUS
 import java.io.File
 import java.lang.StringBuilder
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 import kotlin.reflect.full.staticProperties
 import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
@@ -116,7 +119,7 @@ class GlyphActivity : AppCompatActivity() {
         }
         return UnicodeScript(name, pairs.toString())
     }
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
