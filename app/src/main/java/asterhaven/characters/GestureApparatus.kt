@@ -11,7 +11,7 @@ object GestureApparatus {
                 if (e != null){
                     val xy = worldView.tileAt(e.x, e.y)
                     worldView.walkToTile(xy)
-                    logToTextView("tapped " + worldView.coordinateAt(xy).semiVerbose(), worldView)
+                    logToTextView("tapped " + worldView.charAt(xy), worldView)
                     val char = worldView.charAt(xy)
                     if(char != null) logToTextView(char.toString(), worldView)
                 }

@@ -2,8 +2,8 @@ package asterhaven.characters
 
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.runBlocking
-import kotlin.random.Random
 
+/*
 //script/etc. components over [0, 1]
 //@RequiresApi(Build.VERSION_CODES.N)
 data class Coordinate private constructor(
@@ -63,4 +63,9 @@ class Coffin(val c : Coordinate) : CoordinateWrapper {
         if(BuildConfig.DEBUG) check(false)
         return c
     }
+} */
+
+open class Tile(open val character : UnicodeCharacter? = null)
+class DeferredTile(private val c : Deferred<UnicodeCharacter?>?) : Tile() {
+    override val character by lazy { runBlocking { c?.await() } }
 }

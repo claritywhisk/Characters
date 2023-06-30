@@ -33,10 +33,10 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         p.textAlign = Paint.Align.CENTER
         FontFallback.paints(p)
     }
-    private val selectedLocs = LinkedList<Coordinate>()
+    private val selectedLocs = LinkedList<Tile>()
     private val selectedLocColor = LinkedList<ValueAnimator>()
 
-    lateinit var computedMap : Array<Array<CoordinateWrapper>>
+    lateinit var computedMap : Array<Array<Tile>>
 
     private var updateJob : Job? = null
 
@@ -52,14 +52,14 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         //shift map. use temp in (theoretical) case it's still computing its edges
         val range = 0 until EXTENDED_MAP_SIZE
         val mapTemp = Array(EXTENDED_MAP_SIZE) { i ->
-            Array<CoordinateWrapper>(EXTENDED_MAP_SIZE) { j ->
+            Array<Tile>(EXTENDED_MAP_SIZE) { j ->
                 val x = i + dx
                 val y = j + dy
                 when (x in range && y in range) {
-                    true -> computedMap[x][y].coordinate()
+                    true -> computedMap[x][y]
                     false -> {
                         movement.requisition(i, j) //Movement will set this coordinate
-                        Coffin(computedMap[i][j].coordinate()) //dummy return value
+                        Tile() //dummy return value
                     }
                 }
             }
@@ -96,20 +96,16 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         for (i in LOCAL_RANGE){
             y = -walk.yOffset * tileWidthPx - halfTileWidthPx
             for(j in LOCAL_RANGE){
-                val loc = computedMap[i][j].coordinate()
+                val loc = computedMap[i][j]
                 if(loc in selectedLocs){//note: uses equals(), overridden
                     val shade = selectedLocColor.elementAt(selectedLocs.indexOf(loc)).animatedValue as Int
                     drawTileColor(canvas, x, y, shade)
                 }
-                when(loc.terrain){
-                    Terrain.CLOUD ->
-                        drawTileColor(canvas, x, y, R.color.gray_400)
-                    null -> loc.unicodeCharacter?.let { c ->
-                        val paint = paints[c.fontIndex]
-                        canvas?.let { can ->
-                            drawCharacter(c, paint, can, x, y)
-                            if (i in VISIBLE_RANGE && j in VISIBLE_RANGE) see(c)
-                        }
+                loc.character?.let { c ->
+                    val paint = paints[c.fontIndex]
+                    canvas?.let { can ->
+                        drawCharacter(c, paint, can, x, y)
+                        if (i in VISIBLE_RANGE && j in VISIBLE_RANGE) see(c)
                     }
                 }
                 y += tileWidthPx
@@ -147,15 +143,14 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         val tileY = 2 + ((pxY - offsetPx - walk.yOffset)/tileWidthPx).toInt()
         return intArrayOf(tileX, tileY)
     }
-    fun coordinateAt(pair: IntArray) = computedMap[pair[0]][pair[1]].coordinate()
-    fun charAt(pair: IntArray) : UnicodeCharacter? = coordinateAt(pair).unicodeCharacter
+    fun charAt(pair: IntArray) = computedMap[pair[0]][pair[1]].character
 
     //@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     fun walkToTile(pair : IntArray){
         val tileX = pair[0]
         val tileY = pair[1]
         val touchAnimation = ValueAnimator.ofArgb(R.color.selected_map_tile, Color.TRANSPARENT)
-        val touched = computedMap[tileX][tileY].coordinate()
+        val touched = computedMap[tileX][tileY]
         if(!isAlreadyGoingAnim(touched,touchAnimation)){
             selectedLocs.add(touched)
             selectedLocColor.add(touchAnimation)
@@ -168,26 +163,35 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         val dTilesY = tileY - EXTENDED_MAP_SIZE/2
         walk.to(dTilesX, dTilesY)
     }
-    private fun isAlreadyGoingAnim(coord : Coordinate, freshAnim : ValueAnimator): Boolean {
-        val i = selectedLocs.indexOf(coord)
+    private fun isAlreadyGoingAnim(tile : Tile, freshAnim : ValueAnimator): Boolean {
+        val i = selectedLocs.indexOf(tile)
         if(i == -1) return false
         selectedLocColor[i] = freshAnim
         return true
     }
 
-    fun doInit(){
-        movement = Movement(this) //like most lines, a must!
-        val c = randomBreathableCoordinateForCenterTEST()
+    fun doInit(progress : Progress){
+        movement = Movement(this, progress) //like most lines, a must!
         computedMap = Array(EXTENDED_MAP_SIZE) { i ->
             Array(EXTENDED_MAP_SIZE) { j ->
                 when {
                     i in LOCAL_RANGE && j in LOCAL_RANGE -> {
-                        //println("made$i$j")
-                        Coordinate.create(c.scriptDims)
+                        //random initial tile
+                        var maxsi = -1
+                        var max = 0.0
+                        for(si in 0 until Universe.allScripts.size) {
+                            kotlin.random.Random.nextDouble().let {
+                                if(it < CHAOS) if(it >= max) {
+                                    maxsi = si
+                                    max = it
+                                }
+                            }
+                        }
+                        if(maxsi == -1) Tile() else Tile(progress.randUnseenInScript(maxsi))
                     }
                     else -> {
                         movement.requisition(i, j)
-                        Coffin(c)
+                        Tile()
                     }
                 }
             }

@@ -9,7 +9,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.View.INVISIBLE
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.databinding.ActivityMainBinding
@@ -43,7 +42,7 @@ class MainActivity : AppCompatActivity() {
             CoroutineScope(Dispatchers.Main).launch {
                 binding.textView.typeface = FontFallback.Font.GNU_UNIFONT.getTypeface() //todo dynamic
                 doProgressInit()
-                binding.worldView.doInit()
+                binding.worldView.doInit(progress)
                 /*CoroutineScope(Dispatchers.Default).launch {
                     var x = 0
                     var width = 0

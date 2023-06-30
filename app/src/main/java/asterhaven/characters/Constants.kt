@@ -6,7 +6,7 @@ import kotlin.system.measureTimeMillis
 const val FRESH_PROGRESS = false
 const val MUTE = true
 
-const val CHAOS : Double = .0006 //upper bound of test random
+const val CHAOS : Double = .0003 //upper bound of test random
 
 //worldview speed
 const val A = 1.3f//1f //(tiles/second)/second
@@ -23,22 +23,8 @@ const val SLEEP_DELAY = 1800L
 
 const val WIDTH_TEXT_SIZE_RATIO = 2.5f
 
-//magic walking factors
-const val BLANK_QUO_CAP = 0.95 //todo
-const val PROPORTION_TILE = 0.4
-const val PROPORTION_INTENT = 0.0//0.05
-const val PROPORTION_UNIVERSE = 0.5
-const val PROPORTION_INVENTORY = 0.1
-
-//@RequiresApi(Build.VERSION_CODES.N)
-fun randomBreathableCoordinateForCenterTEST() =
-    Coordinate.create(DoubleArray(Universe.allScripts.size) {
-        _ -> kotlin.random.Random.nextDouble(0.0, CHAOS)
-    })
-
-enum class Terrain {
-    CLOUD
-}
+const val ODDS_PARAMETER_SAME_SCRIPT_NEAR_CHARACTER = 0.05
+const val ODDS_LINEAR_DIMINISH_BY_DISTANCE = 0.01
 
 fun logToTextView(line : String, view : View){
     (view.context as MainActivity).logToTextView(" $line")

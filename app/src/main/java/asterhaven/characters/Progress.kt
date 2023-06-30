@@ -45,7 +45,7 @@ class Progress {
     }
 
     @Synchronized fun randUnseenInScript(si: Int) : UnicodeCharacter {
-        val unseen = allScripts[si].size - seenInScript[si]
+        val unseen = allScripts[si].size - seenInScript[si] //TODO if zero
         var r = Random.nextInt(unseen)
         //todo with Skip List; test on Han https://en.wikipedia.org/wiki/Skip_list
         var i = scriptStartI[si]
