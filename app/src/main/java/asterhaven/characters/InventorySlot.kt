@@ -4,16 +4,19 @@ import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.widget.Button
 
 //@RequiresApi(Build.VERSION_CODES.N)
 class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(context, attrs), DragListener {
-    companion object {
+    companion object Inventory {
+        val scriptCount by lazy { IntArray(Universe.allScripts.size) }
         private val inventory = ArrayList<UnicodeCharacter>()
-        val allSlots = ArrayList<InventorySlot>()
-        val nextOpenSlot : InventorySlot?
+        private val allSlots = ArrayList<InventorySlot>()
+        private val nextOpenSlot : InventorySlot?
             get() {
                 return allSlots.firstOrNull { slot -> slot.occupant == null }
             }
+        fun clearAll() = allSlots.forEach { it.occupant = null }
     }
     init {
         allSlots.add(this)
@@ -31,11 +34,26 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(co
     override var occupant : UnicodeCharacter? = null
         set(s) {
             when(s) {
-                null -> inventory.remove(field)
+                null -> {
+                    field?.let {
+                        inventory.remove(it)
+                        scriptCount[it.scriptIndex()]--
+                    }
+                }
                 else -> {
                     if(inventory.contains(s)) return
                     else {
                         inventory.add(s)
+                        val x = ++scriptCount[s.scriptIndex()]
+                        if(inventory.size == allSlots.size){
+                            if(x == allSlots.size) {
+                                val circleButton = (context as MainActivity).findViewById<Button>(R.id.finished_with_script)
+                                circleButton.visibility = VISIBLE
+                            }
+                            else {
+                                logToTextView("Mixture", this) //todo long press to rubbish
+                            }
+                        }
                         logToTextView(s.toString(), this)
                     }
                 }

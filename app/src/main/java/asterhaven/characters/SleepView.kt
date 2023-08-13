@@ -32,7 +32,7 @@ class SleepView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         oldAlpha.startDelay = SLEEP_DELAY
         oldAlpha.doOnStart {
             glyphOld = glyphNew
-            glyphNew = character()
+            glyphNew = character() ?: glyphOld //todo if completed
             logToTextView(glyphNew.toString(), this)
         }
         oldAlpha.doOnEnd {

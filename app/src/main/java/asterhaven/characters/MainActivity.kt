@@ -20,8 +20,8 @@ import kotlin.concurrent.fixedRateTimer
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var invBinding : InventoryBinding //included layout
-
-    lateinit var progress : Progress
+    private lateinit var progressAsync : Deferred<Progress>
+    val progress by lazy { runBlocking { progressAsync.await() } }
     private lateinit var saveFile : File
     private lateinit var mediaPlayer : MediaPlayer
 
@@ -40,8 +40,8 @@ class MainActivity : AppCompatActivity() {
             FontFallback.loadTypefaces(applicationContext)
             timeTV("readAllUS", binding.worldView) { Universe.readAllUS(resources) }
             CoroutineScope(Dispatchers.Main).launch {
+                launchProgressInit()
                 binding.textView.typeface = FontFallback.Font.GNU_UNIFONT.getTypeface() //todo dynamic
-                doProgressInit()
                 binding.worldView.doInit(progress)
                 /*CoroutineScope(Dispatchers.Default).launch {
                     var x = 0
@@ -79,23 +79,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun doProgressInit() {
+    private fun launchProgressInit() {
         saveFile = File(filesDir, "save")
         if(FRESH_PROGRESS) {
             logToTextView("Fresh start")
             logToTextView(if(saveFile.delete()) "fresh" else " !  NOT fresh")
         }
         if(saveFile.exists()) CoroutineScope(Dispatchers.IO).launch {
-            progress = Progress.load(saveFile).await()
+            progressAsync = Progress.loadAsync(saveFile)
             logToTextView("restored progress of ${progress.card()}")
         }
-        else progress = Progress()
+        else progressAsync = CoroutineScope(Dispatchers.Main).async{ Progress() }
         fixedRateTimer("autosave timer", true, SAVE_EVERY, SAVE_EVERY){
             Progress.saveJob(saveFile, progress)
         }
     }
-
-    fun progressInitialized() = ::progress.isInitialized
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.bar_menu, menu)
@@ -135,14 +133,14 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread { binding.textView.append(line + "\n") }
 
     fun finishedCircleClick(circleButton : View){
-        //TODO
+        InventorySlot.clearAll()
+        //todo photo
         circleButton.visibility = INVISIBLE
     }
 
     fun sleepButtonClick(z : View){
         when(binding.worldView.visibility){
             View.VISIBLE -> {
-                if(!progressInitialized()) return
                 binding.sleepView.setLocation(binding.worldView.movement.sleepScriptDims())
                 crossfade(binding.worldView, binding.sleepView, false){
                     binding.sleepView.sleep()

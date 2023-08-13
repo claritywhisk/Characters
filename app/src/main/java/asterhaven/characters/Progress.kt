@@ -36,29 +36,35 @@ class Progress {
         val i = scriptStartI[scriptI] + c.indexInScript
         if (!seen[i]) {
             seen[i] = true
-            //println("Saw $i " + card())
             seenInScript[scriptI]++
             if (seenInScript[scriptI] == allScripts[scriptI].size)
-                repeat(20){ println("Completed ${allScripts[scriptI].name}!") }
-            //logToTextView("Completed ${allScripts[scriptI].name}!", iprobablyamascreen)
+                println("Completed ${allScripts[scriptI].name}!")
+            //logToTextView("Completed ${allScripts[scriptI].name}!", iprobablyamascreen) //todo
         }
     }
 
-    @Synchronized fun randUnseenInScript(si: Int) : UnicodeCharacter {
-        val unseen = allScripts[si].size - seenInScript[si] //TODO if zero
+    @Synchronized fun randUnseenInScript(si: Int) : UnicodeCharacter? {
+        println("${ allScripts[si].size} ${seenInScript[si]}")
+        val unseen = allScripts[si].size - seenInScript[si]
+        if(unseen <= 0) return null
         var r = Random.nextInt(unseen)
         //todo with Skip List; test on Han https://en.wikipedia.org/wiki/Skip_list
         var i = scriptStartI[si]
+        println(i)
         while (seen[i]) i++
-        while (r-- > 0) {
+        println(i)
+        while (r > 0) {
+            r--
             i++
             while(seen[i]) i++
         }
+        println(i)
+        println("uns $unseen $r $i ${i - scriptStartI[si]} ${seenInScript[si]}");
         return UnicodeCharacter.create(si, i - scriptStartI[si]) //TODO index out of bounds
     }
 
     companion object Save {
-        fun load(file: File) = CoroutineScope(Dispatchers.IO).async {
+        fun loadAsync(file: File) = CoroutineScope(Dispatchers.IO).async {
             val bytes = file.readBytes()
             val p = Progress()
             var script = 0
@@ -72,7 +78,7 @@ class Progress {
                     else -> seenScript = false
                 }
                 val nextScript = script + 1
-                if(nextScript < p.scriptStartI.size && p.scriptStartI[nextScript] == i) {
+                if(nextScript < p.scriptStartI.size && p.scriptStartI[nextScript] == i + 1) {
                     if(seenScript) p.seenScript[script] = true
                     seenScript = true
                     script = nextScript

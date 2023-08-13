@@ -12,10 +12,7 @@ abstract class CharactersView(context: Context?, attrs: AttributeSet?) : View(co
         const val SHRINK_FACTOR = .8f
     }
 
-    fun see(c : UnicodeCharacter) {
-        val x = context as MainActivity
-        if(x.progressInitialized()) x.progress.see(c)
-    }
+    fun see(c : UnicodeCharacter) = (context as MainActivity).progress.see(c)
 
     private val rect = Rect()
     val paintTest by lazy {
