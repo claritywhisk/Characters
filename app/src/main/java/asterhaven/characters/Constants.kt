@@ -3,7 +3,6 @@ package asterhaven.characters
 import android.view.View
 import kotlin.system.measureTimeMillis
 
-const val FRESH_PROGRESS = false
 const val MUTE = true
 
 const val DEBUG_SMALL_SCRIPTS = true
@@ -21,7 +20,7 @@ const val SELECTED_TIME = 3500L
 //general glyph border
 const val SCALE_TEXT2TILE = .75f
 
-const val SAVE_EVERY = 15000L
+const val SAVE_EVERY = 5000L
 const val SLEEP_DELAY = 1800L
 
 const val WIDTH_TEXT_SIZE_RATIO = 2.5f

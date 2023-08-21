@@ -4,9 +4,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Rect
 import android.util.AttributeSet
-import android.view.View
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import asterhaven.characters.typeface.FontFallback

@@ -1,10 +1,13 @@
 package asterhaven.characters
 
+import android.view.View
 import asterhaven.characters.Universe.allScripts
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.random.Random
 import java.io.File
+import kotlin.concurrent.fixedRateTimer
+import kotlin.reflect.KProperty
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.SOURCE)
@@ -31,15 +34,16 @@ class Progress {
 
     fun card() = "${seen.cardinality()} chars seen"
 
-    @Synchronized fun see(c: UnicodeCharacter) {
+    @Synchronized fun see(c: UnicodeCharacter, v : View) {
         val scriptI = c.scriptIndex()
         val i = scriptStartI[scriptI] + c.indexInScript
         if (!seen[i]) {
             seen[i] = true
             seenInScript[scriptI]++
-            if (seenInScript[scriptI] == allScripts[scriptI].size)
+            if (seenInScript[scriptI] == allScripts[scriptI].size) {
                 println("Completed ${allScripts[scriptI].name}!")
-            //logToTextView("Completed ${allScripts[scriptI].name}!", iprobablyamascreen) //todo
+                logToTextView("Completed ${allScripts[scriptI].name}!", v) //todo
+            }
         }
     }
 
@@ -63,8 +67,19 @@ class Progress {
         return UnicodeCharacter.create(si, i - scriptStartI[si]) //TODO index out of bounds
     }
 
-    companion object Save {
-        fun loadAsync(file: File) = CoroutineScope(Dispatchers.IO).async {
+    companion object {
+        lateinit var saveFile : File
+        private var saveJob : Job? = null
+        private lateinit var progress : Progress
+        private lateinit var progressAsync : Deferred<Progress>
+        private var lazyLoadedFlag = false
+        operator fun getValue(mainActivity: MainActivity, property: KProperty<*>): Progress {
+            if(lazyLoadedFlag) return progress
+            progress = runBlocking { progressAsync.await() }
+            lazyLoadedFlag = true
+            return progress
+        }
+        private fun loadAsync(file: File) = CoroutineScope(Dispatchers.IO).async {
             val bytes = file.readBytes()
             val p = Progress()
             var script = 0
@@ -86,14 +101,31 @@ class Progress {
             }
             p
         }
-        fun saveJob(file: File, progress : Progress): Job {
-            val bytes: ByteArray
-            synchronized(progress) {
-                bytes = ByteArray(progress.seen.size()) {
-                    i -> if(progress.seen[i]) 1 else 0
+
+        fun save(progress : Progress) {
+            if(::saveFile.isInitialized && saveJob?.isCompleted != false){
+                val bytes: ByteArray
+                synchronized(progress) {
+                    bytes = ByteArray(progress.seen.size()) {
+                            i -> if(progress.seen[i]) 1 else 0
+                    }
                 }
+                saveJob = CoroutineScope(Dispatchers.IO).launch { saveFile.writeBytes(bytes) }
             }
-            return CoroutineScope(Dispatchers.IO).launch { file.writeBytes(bytes) }
+        }
+
+        fun beginWithSaveFile(f : File){
+            saveFile = f
+            check(lazyLoadedFlag == false)
+            if(saveFile.exists()) CoroutineScope(Dispatchers.IO).launch {
+                progressAsync = loadAsync(saveFile)
+            }
+            else clearProgress()
+        }
+
+        fun clearProgress() {
+            progressAsync = CoroutineScope(Dispatchers.Main).async{ Progress() }
+            lazyLoadedFlag = false
         }
     }
 }

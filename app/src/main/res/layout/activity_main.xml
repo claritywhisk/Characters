@@ -26,11 +26,10 @@
         layout="@layout/inventory"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/barrier1"
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toStartOf="@id/examiner"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/world_view" />
+        app:layout_constraintTop_toBottomOf="@id/world_view" />
 
     <include
         android:id="@+id/examiner"
@@ -38,49 +37,21 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintDimensionRatio="1"
-        app:layout_constraintTop_toBottomOf="@+id/world_view"
         app:layout_constraintLeft_toRightOf="@+id/inventory"
         app:layout_constraintRight_toLeftOf="@+id/picture"
-        app:layout_constraintBottom_toTopOf="@+id/barrier1" />
+        app:layout_constraintTop_toBottomOf="@id/world_view" />
 
-    <View
+    <Button
         android:id="@+id/picture"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:onClick="pictureButtonClick"
         app:layout_constraintDimensionRatio="1"
-        app:layout_constraintBottom_toTopOf="@+id/barrier1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/examiner"
-        app:layout_constraintTop_toBottomOf="@+id/world_view" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrier1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="top" />
-
-    <asterhaven.characters.RefuseView
-        android:id="@+id/recyclebin"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:src="@android:drawable/ic_menu_delete"
-        app:layout_constraintBottom_toTopOf="@+id/barrier2"
-        app:layout_constraintDimensionRatio="1"
-        app:layout_constraintEnd_toStartOf="@+id/space"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/barrier1"
+        app:layout_constraintEnd_toStartOf="@id/z"
+        app:layout_constraintStart_toEndOf="@id/examiner"
+        app:layout_constraintTop_toBottomOf="@id/world_view"
+        app:layout_constraintBottom_toTopOf="@id/catalog"
         app:layout_constraintWidth_percent="0.1667" />
-
-    <Space
-        android:id="@+id/space"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/barrier2"
-        app:layout_constraintDimensionRatio="4"
-        app:layout_constraintEnd_toStartOf="@+id/z"
-        app:layout_constraintStart_toEndOf="@+id/recyclebin"
-        app:layout_constraintTop_toBottomOf="@+id/barrier1"
-        app:layout_constraintWidth_percent="0.6666" />
 
     <Button
         android:id="@+id/z"
@@ -88,28 +59,47 @@
         android:layout_height="0dp"
         android:onClick="sleepButtonClick"
         android:text="@string/sleep_button"
-        app:layout_constraintBottom_toTopOf="@+id/barrier2"
+        app:layout_constraintBottom_toTopOf="@id/settings"
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/space"
-        app:layout_constraintTop_toBottomOf="@+id/barrier1"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@id/picture"
+        app:layout_constraintTop_toBottomOf="@id/world_view"
         app:layout_constraintWidth_percent="0.1667" />
 
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrier2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="top" />
+    <Button
+        android:id="@+id/catalog"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:onClick="catalogButtonClick"
+        app:layout_constraintBottom_toTopOf="@id/textView"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toStartOf="@id/settings"
+        app:layout_constraintStart_toEndOf="@id/examiner"
+        app:layout_constraintTop_toBottomOf="@id/picture"
+        app:layout_constraintWidth_percent="0.1667" />
+
+    <Button
+        android:id="@+id/settings"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:onClick="settingsButtonClick"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/z"
+        app:layout_constraintStart_toEndOf="@id/catalog"
+        app:layout_constraintBottom_toTopOf="@id/textView"
+        app:layout_constraintWidth_percent="0.1667" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:gravity="bottom"
-        android:scrollbars = "vertical"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/barrier2" />
+        app:layout_constraintTop_toBottomOf="@id/examiner" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

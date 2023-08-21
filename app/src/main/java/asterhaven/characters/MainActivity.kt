@@ -16,14 +16,14 @@ import asterhaven.characters.databinding.InventoryBinding
 import kotlinx.coroutines.*
 import java.io.File
 import kotlin.concurrent.fixedRateTimer
+import kotlin.reflect.KProperty
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var invBinding : InventoryBinding //included layout
-    private lateinit var progressAsync : Deferred<Progress>
-    val progress by lazy { runBlocking { progressAsync.await() } }
-    private lateinit var saveFile : File
     private lateinit var mediaPlayer : MediaPlayer
+
+    val progress by Progress
 
     private var shortAnimationDuration : Int = 0
 
@@ -39,8 +39,11 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             FontFallback.loadTypefaces(applicationContext)
             timeTV("readAllUS", binding.worldView) { Universe.readAllUS(resources) }
+            Progress.beginWithSaveFile(File(filesDir, "save"))
+            fixedRateTimer("autosave timer", true, SAVE_EVERY, SAVE_EVERY){
+                Progress.save(progress)
+            }
             CoroutineScope(Dispatchers.Main).launch {
-                launchProgressInit()
                 binding.textView.typeface = FontFallback.Font.GNU_UNIFONT.getTypeface() //todo dynamic
                 binding.worldView.doInit(progress)
                 /*CoroutineScope(Dispatchers.Default).launch {
@@ -65,33 +68,6 @@ class MainActivity : AppCompatActivity() {
             mediaPlayer = MediaPlayer.create(applicationContext, R.raw.atfots)
             if(MUTE) mediaPlayer.setVolume(0f, 0f)
             mediaPlayer.start()
-        }
-    }
-
-    @OptIn(InternalCoroutinesApi::class)
-    override fun onStop() {
-        super.onStop()
-        if(::saveFile.isInitialized){
-            val sj = Progress.saveJob(saveFile, progress)
-            sj.invokeOnCompletion(true) {
-                println("TEST/DEBUG: final save, threw: $it")
-            }
-        }
-    }
-
-    private fun launchProgressInit() {
-        saveFile = File(filesDir, "save")
-        if(FRESH_PROGRESS) {
-            logToTextView("Fresh start")
-            logToTextView(if(saveFile.delete()) "fresh" else " !  NOT fresh")
-        }
-        if(saveFile.exists()) CoroutineScope(Dispatchers.IO).launch {
-            progressAsync = Progress.loadAsync(saveFile)
-            logToTextView("restored progress of ${progress.card()}")
-        }
-        else progressAsync = CoroutineScope(Dispatchers.Main).async{ Progress() }
-        fixedRateTimer("autosave timer", true, SAVE_EVERY, SAVE_EVERY){
-            Progress.saveJob(saveFile, progress)
         }
     }
 
@@ -138,6 +114,10 @@ class MainActivity : AppCompatActivity() {
         circleButton.visibility = INVISIBLE
     }
 
+    fun pictureButtonClick(v : View){
+        //todo
+    }
+
     fun sleepButtonClick(z : View){
         when(binding.worldView.visibility){
             View.VISIBLE -> {
@@ -152,6 +132,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    fun catalogButtonClick(v : View){
+        Progress.clearProgress()
+        logToTextView("Reset progress")
+    }
+    fun settingsButtonClick(v : View){
+        //todo
+    }
+
     //https://developer.android.com/training/animation/reveal-or-hide-view#Crossfade
     private fun crossfade(a : View, b : View, beGone : Boolean, onComplete : () -> Unit) {
         b.apply {

@@ -2,9 +2,9 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.7">
-      <module name="Characters.app" target="12" />
-      <module name="Characters.app.typeface" target="12" />
-      <module name="Characters.findglyphs" target="12" />
+      <module name="Characters.app" target="17" />
+      <module name="Characters.app.typeface" target="17" />
+      <module name="Characters.findglyphs" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>
