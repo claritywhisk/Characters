@@ -90,7 +90,7 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(co
     private val gestureDetector = GestureApparatus.forInventorySlot(getContext(),this)
     override fun onTouchEvent(event: MotionEvent): Boolean {//todo verify ok
         gestureDetector.onTouchEvent(event)
-        if((context as MainActivity).inventoryDeleteConfirmation != null) return false
+        if((context as MainActivity).inventoryDeleteConfirmation != null && !confirmDelete.isOpen()) return false
         return true //https://stackoverflow.com/a/23725322/2563422
     }
 
