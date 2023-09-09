@@ -25,20 +25,6 @@ interface DragListener {
                     //register for more events
                     true
                 }
-                DragEvent.ACTION_DRAG_ENTERED -> {
-                    if (occupant == null) {
-                        this.highlight()
-                        true
-                    } else false
-                }
-                DragEvent.ACTION_DRAG_LOCATION -> {
-                    //ignore
-                    true
-                }
-                DragEvent.ACTION_DRAG_EXITED -> {
-                    this.unHighlight()
-                    true
-                }
                 DragEvent.ACTION_DROP -> {
                     var consume = true
                     val dropped = beingDragged//event.clipData.getItemAt(0).text.toString()
@@ -56,7 +42,6 @@ interface DragListener {
                     consume
                 }
                 DragEvent.ACTION_DRAG_ENDED -> {
-                    this.unHighlight()
                     if(formerOccupantSentToDrag != null) {
                         if (event.result) formerOccupantSentToDrag = null
                         else occupant = formerOccupantSentToDrag
@@ -68,13 +53,5 @@ interface DragListener {
                 }
             }
         }
-    }
-    fun highlight(){
-        (this as View).setBackgroundColor(ContextCompat.getColor(context, R.color.drop_possible_background))
-        (this as View).invalidate()
-    }
-    private fun unHighlight() {
-        (this as View).setBackgroundColor(Color.TRANSPARENT)
-        (this as View).invalidate()
     }
 }

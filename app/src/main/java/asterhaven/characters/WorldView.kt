@@ -130,10 +130,11 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
             it.textSize = (tileWidthPx * SCALE_TEXT2TILE) //.roundToInt().toFloat()
         }
     }
-
     private val gestureDetector = GestureApparatus.forWV(getContext(),this)
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        //super.onTouchEvent(event) //todo verify ok
         gestureDetector.onTouchEvent(event)
+        if((context as MainActivity).inventoryDeleteConfirmation != null) return false
         return true //https://stackoverflow.com/a/23725322/2563422
     }
 

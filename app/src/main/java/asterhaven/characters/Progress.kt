@@ -76,6 +76,7 @@ class Progress {
         operator fun getValue(mainActivity: MainActivity, property: KProperty<*>): Progress {
             if(lazyLoadedFlag) return progress
             progress = runBlocking { progressAsync.await() }
+            if(BuildConfig.DEBUG) mainActivity.logToTextView("Started with ${progress.seen.cardinality()} chars")
             lazyLoadedFlag = true
             return progress
         }

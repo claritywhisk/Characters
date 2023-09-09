@@ -7,31 +7,30 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
-import android.view.View.INVISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.databinding.ActivityMainBinding
-import asterhaven.characters.databinding.InventoryBinding
+import asterhaven.characters.unicodescript.UnicodeScript
 import kotlinx.coroutines.*
 import java.io.File
 import kotlin.concurrent.fixedRateTimer
-import kotlin.reflect.KProperty
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var invBinding : InventoryBinding //included layout
+    //private lateinit var invBinding : InventoryBinding //included layout
     private lateinit var mediaPlayer : MediaPlayer
 
     val progress by Progress
-
+    var inventoryDeleteConfirmation : InventorySlot.ConfirmDeleteStatus? = null
     private var shortAnimationDuration : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_Characters)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        invBinding = binding.inventory
+        //invBinding = binding.inventory
         setContentView(binding.root)
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
@@ -108,10 +107,15 @@ class MainActivity : AppCompatActivity() {
     fun logToTextView(line : String) =
         runOnUiThread { binding.textView.append(line + "\n") }
 
-    fun finishedCircleClick(circleButton : View){
+    fun inventoryMatched(script : UnicodeScript){
+        binding.inventory.scriptName.text = script.name
+        crossfade(binding.inventory.invTable, binding.inventory.invMatched, false){}
+    }
+
+    fun finishedWithScriptClick(v : View){
         InventorySlot.clearAll()
-        //todo photo
-        circleButton.visibility = INVISIBLE
+        //todo picture?
+        crossfade(binding.inventory.invMatched, binding.inventory.invTable, false){}
     }
 
     fun pictureButtonClick(v : View){
@@ -160,5 +164,14 @@ class MainActivity : AppCompatActivity() {
                     onComplete.invoke()
                 }
             })
+    }
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        inventoryDeleteConfirmation?.let {
+            if(event?.action == MotionEvent.ACTION_DOWN) {
+                it.didRespond()
+                return true
+            }
+        }
+        return super.onTouchEvent(event)
     }
 }

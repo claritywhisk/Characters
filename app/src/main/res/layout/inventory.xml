@@ -9,34 +9,25 @@
         android:layout_height="match_parent"
         android:background="@drawable/inventory_border_outer">
 
-        <TableRow
-            android:layout_weight="1"
-            android:background="#00000000">
-
+        <TableRow android:layout_weight="1">
             <asterhaven.characters.InventorySlot
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/inventory_border_slot" />
-
             <asterhaven.characters.InventorySlot
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/inventory_border_slot" />
-
         </TableRow>
 
-        <TableRow
-            android:layout_weight="1"
-            android:background="#00000000">
-
+        <TableRow android:layout_weight="1">
             <asterhaven.characters.InventorySlot
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/inventory_border_slot" />
-
             <asterhaven.characters.InventorySlot
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -45,11 +36,30 @@
         </TableRow>
     </TableLayout>
 
-    <Button
-        android:id="@+id/finished_with_script"
-        android:onClick="finishedCircleClick"
+    <LinearLayout
+        android:id="@+id/inv_matched"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@null"
-        android:visibility="invisible" />
+        android:orientation="vertical"
+        android:visibility="invisible"
+        android:paddingStart="8dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp">
+        <TextView
+            android:id="@+id/script_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/script_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/done_with_script"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/script_done_button"
+            android:onClick="finishedWithScriptClick"/>
+    </LinearLayout>
 </RelativeLayout>
