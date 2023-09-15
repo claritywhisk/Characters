@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         setTheme(R.style.Theme_Characters)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        //invBinding = binding.inventory
+        InventorySlot.init(this)
         setContentView(binding.root)
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)

@@ -12,5 +12,11 @@
     <color name="gray_400">#FFBDBDBD</color>
     <color name="gray_600">#FF757575</color>
     <color name="selected_map_tile">#DA00FF90</color>
-    <color name="inventory_lines">#FFBDBDBD</color>
+    <color name="inv_divider_lines">#FFBDBDBD</color>
+    <color name="inv_highlight_turquoise">#40E0D0</color>
+    <color name="inv_highlight_coral">#FF6B6B</color>
+    <color name="inv_highlight_goldenrod">#DAA520</color>
+    <color name="inv_highlight_magenta">#FF00FF</color>
+    <color name="inv_duplicate_flash">#DE5D83</color>
+
 </resources>

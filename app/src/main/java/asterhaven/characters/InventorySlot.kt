@@ -1,31 +1,37 @@
 package asterhaven.characters
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.core.content.ContextCompat
 
-//@RequiresApi(Build.VERSION_CODES.N)
 class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(context, attrs), DragListener {
     companion object Inventory {
         val scriptCount by lazy { IntArray(Universe.allScripts.size) }
         private val inventory = ArrayList<UnicodeCharacter>()
         private val allSlots = ArrayList<InventorySlot>()
         private val nextOpenSlot : InventorySlot?
-            get() {
-                return allSlots.firstOrNull { slot -> slot.occupant == null }
-            }
-        private var trashCanDrawable: Drawable? = null
+            get() = allSlots.firstOrNull { slot -> slot.occupant == null }
+        lateinit var trashCanDrawable: Drawable
+        lateinit var matchColors: List<Int>
         fun clearAll() = allSlots.forEach { it.occupant = null }
+        fun init(c : Context){
+            trashCanDrawable = ContextCompat.getDrawable(c, android.R.drawable.ic_menu_delete)!!
+            matchColors = listOf(
+                ContextCompat.getColor(c, R.color.inv_highlight_coral),
+                ContextCompat.getColor(c, R.color.inv_highlight_goldenrod),
+                ContextCompat.getColor(c, R.color.inv_highlight_magenta),
+                ContextCompat.getColor(c, R.color.inv_highlight_turquoise)
+            )
+        }
     }
     init {
         allSlots.add(this)
         setOnDragListener()
-        if(trashCanDrawable == null && context != null){
-            trashCanDrawable = ContextCompat.getDrawable(context, android.R.drawable.ic_menu_delete)
-        }
     }
 
     private val textSize by lazy {
@@ -46,17 +52,31 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(co
                     }
                 }
                 else -> {
-                    if(inventory.contains(s)) return
+                    if(inventory.contains(s)) {
+                        allSlots.first { it.occupant == s }.duplicate_flash.start()
+                        return
+                    }
                     else {
                         inventory.add(s)
                         val x = ++scriptCount[s.scriptIndex()]
                         if(inventory.size == allSlots.size){
                             if(x == allSlots.size) {
                                 (context as MainActivity).inventoryMatched(s.script)
+                                highlight.apply {
+                                    setIntValues(highlight.animatedValue as Int, Color.TRANSPARENT)
+                                    start()
+                                }
                             }
                             else {
-                                logToTextView("Mixture", this)
-
+                                val colors = matchColors.shuffled()
+                                val scripts = allSlots.map { it.occupant?.script }.distinct() //todo null?
+                                allSlots.forEach {
+                                    val color = colors[scripts.indexOf(it.occupant?.script)]//todo null?
+                                    it.highlight.apply {
+                                        setIntValues(Color.TRANSPARENT, color)
+                                        start()
+                                    }
+                                }
                             }
                         }
                         logToTextView(s.toString(), this)
@@ -82,6 +102,8 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(co
                 val occ = occupant ?: return //capture occupant (for thread safety)
                 val p = dragPaints[occ.fontIndex]
                 p.textSize = textSize
+                canvas.drawColor(duplicate_flash.animatedValue as Int)
+                canvas.drawColor(highlight.animatedValue as Int)
                 drawCharacter(occ, p, canvas)
             }
         }
@@ -122,4 +144,14 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(co
         }
     }
     val confirmDelete = ConfirmDeleteStatus()
+
+    private val duplicate_flash =
+        ValueAnimator.ofArgb(Color.TRANSPARENT, R.color.inv_duplicate_flash, Color.TRANSPARENT).apply {
+            addUpdateListener { invalidate() }
+            duration = INV_DUP_FLASH_DURATION
+        }
+    private var highlight = ValueAnimator.ofArgb(Color.TRANSPARENT).apply {
+        addUpdateListener { invalidate() }
+        duration = INV_HIGHLIGHT_DURATION
+    }
 }

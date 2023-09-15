@@ -3,16 +3,18 @@ package asterhaven.characters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import asterhaven.characters.typeface.FontFallback
 
 @SuppressLint("RestrictedApi")
 class ExaminerView(context: Context, attrs: AttributeSet?) : androidx.appcompat.widget.AppCompatTextView(context, attrs), DragListener {
+    val hex by lazy { (parent as ConstraintLayout).findViewById<TextView>(R.id.hex) }
     override var occupant : UnicodeCharacter? = null
         set(value) {
-            value?.let {
-                typeface = FontFallback.Font.values()[it.fontIndex].getTypeface()
-                text = it.asString
-            }
+            if(value != null) typeface = FontFallback.Font.values()[value.fontIndex].getTypeface()
+            text = value?.asString ?: ""
+            hex.text = value?.hex() ?: ""
             field = value
         }
     override var formerOccupantSentToDrag: UnicodeCharacter? = null
