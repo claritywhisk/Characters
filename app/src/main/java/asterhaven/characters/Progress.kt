@@ -1,12 +1,11 @@
 package asterhaven.characters
 
-import android.view.View
+import android.widget.Toast
 import asterhaven.characters.Universe.allScripts
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.random.Random
 import java.io.File
-import kotlin.concurrent.fixedRateTimer
 import kotlin.reflect.KProperty
 
 @Target(AnnotationTarget.FIELD)
@@ -14,13 +13,13 @@ import kotlin.reflect.KProperty
 private annotation class Saved
 
 //Todo versioning smooth transition when game updates
-class Progress {
+class Progress() {
     private val scriptStartI: IntArray
-    private val seenInScript: IntArray
+    val seenInScript: IntArray
     val seenScript : BooleanArray
     @Saved val seen: BitSet
 
-    constructor(){
+    init {
         var n = 0
         scriptStartI = IntArray(allScripts.size) { i ->
             val start = n
@@ -34,36 +33,35 @@ class Progress {
 
     fun card() = "${seen.cardinality()} chars seen"
 
-    @Synchronized fun see(c: UnicodeCharacter, v : View) {
+    @Synchronized fun see(c: UnicodeCharacter, ma: MainActivity) {
         val scriptI = c.scriptIndex()
         val i = scriptStartI[scriptI] + c.indexInScript
         if (!seen[i]) {
             seen[i] = true
-            seenInScript[scriptI]++
-            if (seenInScript[scriptI] == allScripts[scriptI].size) {
-                println("Completed ${allScripts[scriptI].name}!")
-                logToTextView("Completed ${allScripts[scriptI].name}!", v) //todo
+            val x = seenInScript[scriptI]++
+            val sought = c.script == ma.matched4
+            if(sought) ma.progressBar?.setProgress(x, true)
+            if (x == allScripts[scriptI].size) {
+                Toast.makeText(ma, "Completed ${allScripts[scriptI].name}!", Toast.LENGTH_SHORT).show()
+                if(sought) ma.finishedWithScript()
             }
         }
     }
 
     @Synchronized fun randUnseenInScript(si: Int) : UnicodeCharacter? {
-        println("${ allScripts[si].size} ${seenInScript[si]}")
+        //println("${ allScripts[si].size} ${seenInScript[si]}")
         val unseen = allScripts[si].size - seenInScript[si]
         if(unseen <= 0) return null
         var r = Random.nextInt(unseen)
         //todo with Skip List; test on Han https://en.wikipedia.org/wiki/Skip_list
         var i = scriptStartI[si]
-        println(i)
         while (seen[i]) i++
-        println(i)
         while (r > 0) {
             r--
             i++
             while(seen[i]) i++
         }
-        println(i)
-        println("uns $unseen $r $i ${i - scriptStartI[si]} ${seenInScript[si]}");
+        //println("uns $unseen $r $i ${i - scriptStartI[si]} ${seenInScript[si]}");
         return UnicodeCharacter.create(si, i - scriptStartI[si]) //TODO index out of bounds
     }
 

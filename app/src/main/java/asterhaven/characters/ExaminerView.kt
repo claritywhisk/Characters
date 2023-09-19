@@ -3,13 +3,13 @@ package asterhaven.characters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.view.ViewGroup
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import asterhaven.characters.typeface.FontFallback
 
 @SuppressLint("RestrictedApi")
 class ExaminerView(context: Context, attrs: AttributeSet?) : androidx.appcompat.widget.AppCompatTextView(context, attrs), DragListener {
-    val hex by lazy { (parent as ConstraintLayout).findViewById<TextView>(R.id.hex) }
+    val hex by lazy { (parent as ViewGroup).findViewById<TextView>(R.id.hex) }
     override var occupant : UnicodeCharacter? = null
         set(value) {
             if(value != null) typeface = FontFallback.Font.values()[value.fontIndex].getTypeface()

@@ -16,7 +16,7 @@
         android:id="@+id/sleep_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="#FFE1E1"
+        android:background="?attr/colorSecondary"
         android:visibility="gone"
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintTop_toTopOf="parent" />

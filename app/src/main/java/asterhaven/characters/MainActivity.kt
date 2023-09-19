@@ -9,6 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.databinding.ActivityMainBinding
@@ -23,6 +24,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mediaPlayer : MediaPlayer
 
     val progress by Progress
+    var progressBar : ProgressBar? = null
+    var matched4 : UnicodeScript? = null
     var inventoryDeleteConfirmation : InventorySlot.ConfirmDeleteStatus? = null
     private var shortAnimationDuration : Int = 0
 
@@ -108,18 +111,29 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread { binding.textView.append(line + "\n") }
 
     fun inventoryMatched(script : UnicodeScript){
+        matched4 = script
         binding.inventory.scriptName.text = script.name
+        progressBar = binding.inventory.scriptProgress.also {
+            it.max = script.size
+            it.setProgress(progress.seenInScript[Universe.indexOfScript[script]!!], true)
+        }
         crossfade(binding.inventory.invTable, binding.inventory.invMatched, false){}
     }
 
-    fun finishedWithScriptClick(v : View){
+    private fun finishedWithScriptClick(v : View) = finishedWithScript()
+    fun finishedWithScript(){
         InventorySlot.clearAll()
         //todo picture?
         crossfade(binding.inventory.invMatched, binding.inventory.invTable, false){}
+        progressBar = null
+        matched4 = null
     }
 
     fun pictureButtonClick(v : View){
-        //todo
+        for(i in Universe.allScripts.indices){
+            val s = Universe.allScripts[i]
+            logToTextView("${s.name} ${progress.seenInScript[i]}/${s.size} ${progress.seenScript[i]}")
+        }
     }
 
     fun sleepButtonClick(z : View){

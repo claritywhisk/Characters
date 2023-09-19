@@ -7,6 +7,7 @@ const val MUTE = true
 
 const val DEBUG_SMALL_SCRIPTS = true
 const val DEBUG_MAX_SCRIPT_SIZE = 20
+const val DEBUG_GLYPH_BOUNDS = false
 
 val CHAOS : Double = if(DEBUG_SMALL_SCRIPTS) .1 else .0003 //upper bound of test random
 
@@ -27,8 +28,14 @@ const val SLEEP_DELAY = 1800L
 
 const val WIDTH_TEXT_SIZE_RATIO = 2.5f
 
+const val ODDS_BASE_CHARACTER_PREVALENCE = 0.15
 const val ODDS_PARAMETER_SAME_SCRIPT_NEAR_CHARACTER = 0.05
 const val ODDS_LINEAR_DIMINISH_BY_DISTANCE = 0.01
+private const val ODDS_INV_1 = 0.1
+private const val ODDS_INV_2 = 0.2
+private const val ODDS_INV_3 = 0.3
+private const val ODDS_INV_4 = 1.0
+val ODDS_INVENTORY = doubleArrayOf(0.0, ODDS_INV_1, ODDS_INV_2, ODDS_INV_3, ODDS_INV_4)
 
 fun logToTextView(line : String, view : View){
     (view.context as MainActivity).logToTextView(" $line")

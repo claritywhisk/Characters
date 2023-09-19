@@ -12,7 +12,10 @@ abstract class CharactersView(context: Context?, attrs: AttributeSet?) : View(co
         const val SHRINK_FACTOR = .8f
     }
 
-    fun see(c : UnicodeCharacter) = (context as MainActivity).progress.see(c, this)
+    fun see(c : UnicodeCharacter) {
+        val ma = (context as MainActivity)
+        val seenInScript = ma.progress.see(c, ma)
+    }
 
     private val rect = Rect()
     val paintTest by lazy {
@@ -34,26 +37,29 @@ abstract class CharactersView(context: Context?, attrs: AttributeSet?) : View(co
         paint.getTextBounds(c.asString,0, c.asString.length, rect)
 
         //rect.contains(0,0)) false
+        if(DEBUG_GLYPH_BOUNDS) {
+            val wid = paint.measureText(c.asString)
 
-        val wid = paint.measureText(c.asString)
+            paintTest.color = Color.BLUE
+            paintTest.strokeWidth = 4f
 
-        paintTest.strokeWidth = 4f
+            rect.offset((x - wid / 2).toInt(), baseline.toInt())
+            canvas.drawRect(
+                rect.left.toFloat(), rect.top.toFloat(),
+                rect.right.toFloat(), rect.bottom.toFloat(), paintTest
+            )
 
-        rect.offset((x - wid / 2).toInt(), baseline.toInt())
-        canvas.drawRect(rect.left.toFloat(), rect.top.toFloat(),
-            rect.right.toFloat(), rect.bottom.toFloat(), paintTest)
+            val dWid = wid / 2 - rect.width() / 2
 
-        val dWid = wid / 2 - rect.width() / 2
+            paintTest.color = Color.RED
+            paintTest.strokeWidth = 2f
 
-        paintTest.color = Color.RED
-        paintTest.strokeWidth = 2f
-
-        rect.offset(dWid.toInt(), 0)
-        canvas.drawRect(rect.left.toFloat(), rect.top.toFloat(),
-            rect.right.toFloat(), rect.bottom.toFloat(), paintTest)
-
-        paintTest.color = Color.BLUE
-
+            rect.offset(dWid.toInt(), 0)
+            canvas.drawRect(
+                rect.left.toFloat(), rect.top.toFloat(),
+                rect.right.toFloat(), rect.bottom.toFloat(), paintTest
+            )
+        }
 
         canvas.drawText(c.asString, x, baseline, paint)
     }

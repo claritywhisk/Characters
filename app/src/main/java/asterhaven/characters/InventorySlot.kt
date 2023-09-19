@@ -44,47 +44,46 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(co
     override var formerOccupantSentToDrag: UnicodeCharacter? = null
     override var occupant : UnicodeCharacter? = null
         set(s) {
-            when(s) {
-                null -> {
-                    field?.let {
-                        inventory.remove(it)
-                        scriptCount[it.scriptIndex()]--
-                    }
+            if(s == null) {
+                field?.let {
+                    inventory.remove(it)
+                    scriptCount[it.scriptIndex()]--
                 }
-                else -> {
-                    if(inventory.contains(s)) {
-                        allSlots.first { it.occupant == s }.duplicate_flash.start()
-                        return
+                field = s
+                invalidate()
+                return
+            }
+            else if(inventory.contains(s)) {
+                allSlots.first { it.occupant == s }.duplicate_flash.start()
+                return
+            }
+            else {
+                logToTextView(s.toString(), this)
+                field = s
+                invalidate()
+                inventory.add(s)
+                val x = ++scriptCount[s.scriptIndex()]
+                if(inventory.size == allSlots.size){
+                    if(x == allSlots.size) {
+                        (context as MainActivity).inventoryMatched(s.script)
+                        highlight.apply {
+                            setIntValues(highlight.animatedValue as Int, Color.TRANSPARENT)
+                            start()
+                        }
                     }
                     else {
-                        inventory.add(s)
-                        val x = ++scriptCount[s.scriptIndex()]
-                        if(inventory.size == allSlots.size){
-                            if(x == allSlots.size) {
-                                (context as MainActivity).inventoryMatched(s.script)
-                                highlight.apply {
-                                    setIntValues(highlight.animatedValue as Int, Color.TRANSPARENT)
-                                    start()
-                                }
-                            }
-                            else {
-                                val colors = matchColors.shuffled()
-                                val scripts = allSlots.map { it.occupant?.script }.distinct() //todo null?
-                                allSlots.forEach {
-                                    val color = colors[scripts.indexOf(it.occupant?.script)]//todo null?
-                                    it.highlight.apply {
-                                        setIntValues(Color.TRANSPARENT, color)
-                                        start()
-                                    }
-                                }
+                        val colors = matchColors.shuffled()
+                        val scripts = allSlots.map { it.occupant!!.script }.distinct()
+                        allSlots.forEach {
+                            val color = colors[scripts.indexOf(it.occupant!!.script)]
+                            it.highlight.apply {
+                                setIntValues(Color.TRANSPARENT, color)
+                                start()
                             }
                         }
-                        logToTextView(s.toString(), this)
                     }
                 }
             }
-            field = s
-            invalidate()
         }
 
     override fun destination() : DragListener? =

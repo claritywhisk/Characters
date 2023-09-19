@@ -30,17 +30,21 @@ class Movement(private val wv : WorldView, private val progress : Progress) {
     }
 
     private fun tileOdds(newX : Int, newY : Int) : DoubleArray {
-        val sum = DoubleArray(SZ) //sum of dimensions before normalization
+        val baseRate = ODDS_BASE_CHARACTER_PREVALENCE / Universe.allScripts.size
+        val odds = DoubleArray(SZ) { i ->
+            baseRate + ODDS_INVENTORY[InventorySlot.scriptCount[i]]
+        }
         forLocalMap { mapX, mapY, c ->
             if(c != null) {
                 val dx = newX - mapX
                 val dy = newY - mapY
                 val d = sqrt(0.0 + dx * dx + dy * dy)
-                sum[c.scriptIndex()] +=
+                odds[c.scriptIndex()] +=
                     ODDS_PARAMETER_SAME_SCRIPT_NEAR_CHARACTER - d * ODDS_LINEAR_DIMINISH_BY_DISTANCE
             }
         }
-        return sum
+        odds.sum().also { if(it > 1.0) for(i in odds.indices) odds[i] /= it }
+        return odds
     }
 
     private val extendedRange = 1..SIDE_LENGTH_EXTENDED

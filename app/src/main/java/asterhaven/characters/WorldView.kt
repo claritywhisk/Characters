@@ -8,6 +8,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import asterhaven.characters.typeface.FontFallback
+import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import java.util.*
@@ -102,7 +103,9 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
                     drawTileColor(canvas, x, y, shade)
                 }
                 loc.character?.let { c ->
-                    val paint = paints[c.fontIndex]
+                    val paint = paints[c.fontIndex].also {
+                        it.color = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnPrimary)
+                    }
                     canvas?.let { can ->
                         drawCharacter(c, paint, can, x, y)
                         if (i in VISIBLE_RANGE && j in VISIBLE_RANGE) see(c)
