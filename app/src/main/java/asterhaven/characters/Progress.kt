@@ -1,5 +1,6 @@
 package asterhaven.characters
 
+import android.view.Gravity
 import android.widget.Toast
 import asterhaven.characters.Universe.allScripts
 import kotlinx.coroutines.*
@@ -8,17 +9,16 @@ import kotlin.random.Random
 import java.io.File
 import kotlin.reflect.KProperty
 
-@Target(AnnotationTarget.FIELD)
-@Retention(AnnotationRetention.SOURCE)
-private annotation class Saved
-
 //Todo versioning smooth transition when game updates
 class Progress() {
+    class Marks(n : Int) {
+        val char = BitSet(n)
+        val countInScript = IntArray(allScripts.size)
+    }
+    val seen: Marks
+    val spawnedOrSeen : Marks
+    val seenScript = BooleanArray(allScripts.size) //flags for script completion
     private val scriptStartI: IntArray
-    val seenInScript: IntArray
-    val seenScript : BooleanArray
-    @Saved val seen: BitSet
-
     init {
         var n = 0
         scriptStartI = IntArray(allScripts.size) { i ->
@@ -26,44 +26,58 @@ class Progress() {
             n += allScripts[i].size
             start
         }
-        seenInScript = IntArray(allScripts.size)
-        seenScript = BooleanArray(allScripts.size)
-        seen = BitSet(n)
+        seen = Marks(n)
+        spawnedOrSeen = Marks(n)
     }
-
-    fun card() = "${seen.cardinality()} chars seen"
-
     @Synchronized fun see(c: UnicodeCharacter, ma: MainActivity) {
         val scriptI = c.scriptIndex()
-        val i = scriptStartI[scriptI] + c.indexInScript
-        if (!seen[i]) {
-            seen[i] = true
-            val x = seenInScript[scriptI]++
+        if (!seen.char[c.i]) {
+            seen.char[c.i] = true
+            val x = ++seen.countInScript[scriptI]
             val sought = c.script == ma.matched4
             if(sought) ma.progressBar?.setProgress(x, true)
             if (x == allScripts[scriptI].size) {
-                Toast.makeText(ma, "Completed ${allScripts[scriptI].name}!", Toast.LENGTH_SHORT).show()
+                seenScript[scriptI] = true
+                val toast = Toast.makeText(ma, "Completed ${allScripts[scriptI].name}!", Toast.LENGTH_SHORT)
+                toast.setGravity(Gravity.TOP, 0, 0)
+                toast.show()
+                ma.logToTextView("Completed ${allScripts[scriptI].name}!")
                 if(sought) ma.finishedWithScript()
             }
         }
     }
 
-    @Synchronized fun randUnseenInScript(si: Int) : UnicodeCharacter? {
-        //println("${ allScripts[si].size} ${seenInScript[si]}")
-        val unseen = allScripts[si].size - seenInScript[si]
-        if(unseen <= 0) return null
-        var r = Random.nextInt(unseen)
+    //todo porpoise of synchonization?
+    @Synchronized fun spawnRandUnspawnedInScript(si: Int): UnicodeCharacter? = spawnRandUnmarked(spawnedOrSeen, si)
+    @Synchronized fun spawnRandUnseenInScript(si: Int): UnicodeCharacter? = spawnRandUnmarked(seen, si)
+    private fun spawnRandUnmarked(marks: Marks, si: Int): UnicodeCharacter? {
+        val unmarked = allScripts[si].size - marks.countInScript[si]
+        if(unmarked <= 0) return null
+        var r = Random.nextInt(unmarked)
         //todo with Skip List; test on Han https://en.wikipedia.org/wiki/Skip_list
         var i = scriptStartI[si]
-        while (seen[i]) i++
+        while (seen.char[i]) i++
         while (r > 0) {
             r--
             i++
-            while(seen[i]) i++
+            while(seen.char[i]) i++
         }
-        //println("uns $unseen $r $i ${i - scriptStartI[si]} ${seenInScript[si]}");
-        return UnicodeCharacter.create(si, i - scriptStartI[si]) //TODO index out of bounds
+        spawnedOrSeen.char[i] = true
+        return UnicodeCharacter.create(si, i - scriptStartI[si]) //TODO? index out of bounds
     }
+    fun mayUnspawn(c : UnicodeCharacter) = c.i.let {
+        if(spawnedOrSeen.char[it] && !seen.char[it]){
+            spawnedOrSeen.char[it] = false
+            spawnedOrSeen.countInScript[c.scriptIndex()]--
+        }
+    }
+    fun didNotUnspawn(c : UnicodeCharacter) = c.i.let {
+        if(!spawnedOrSeen.char[it]){
+            spawnedOrSeen.char[it] = true
+            spawnedOrSeen.countInScript[c.scriptIndex()]++
+        }
+    }
+    private val UnicodeCharacter.i get() = scriptStartI[this.scriptIndex()] + this.indexInScript
 
     companion object {
         lateinit var saveFile : File
@@ -74,7 +88,7 @@ class Progress() {
         operator fun getValue(mainActivity: MainActivity, property: KProperty<*>): Progress {
             if(lazyLoadedFlag) return progress
             progress = runBlocking { progressAsync.await() }
-            if(BuildConfig.DEBUG) mainActivity.logToTextView("Started with ${progress.seen.cardinality()} chars")
+            if(BuildConfig.DEBUG) mainActivity.logToTextView("Started with ${progress.seen.char.cardinality()} chars")
             lazyLoadedFlag = true
             return progress
         }
@@ -83,11 +97,13 @@ class Progress() {
             val p = Progress()
             var script = 0
             var seenScript = true
-            for(i in 0 until p.seen.size()) {
+            for(i in 0 until p.seen.char.size()) {
                 when(bytes[i]) {
                     1.toByte() -> {
-                        p.seen[i] = true
-                        p.seenInScript[script]++
+                        p.seen.char[i] = true
+                        p.seen.countInScript[script]++
+                        p.spawnedOrSeen.char[i] = true
+                        p.spawnedOrSeen.countInScript[script]++
                     }
                     else -> seenScript = false
                 }
@@ -105,8 +121,8 @@ class Progress() {
             if(::saveFile.isInitialized && saveJob?.isCompleted != false){
                 val bytes: ByteArray
                 synchronized(progress) {
-                    bytes = ByteArray(progress.seen.size()) {
-                            i -> if(progress.seen[i]) 1 else 0
+                    bytes = ByteArray(progress.seen.char.size()) {
+                            i -> if(progress.seen.char[i]) 1 else 0
                     }
                 }
                 saveJob = CoroutineScope(Dispatchers.IO).launch { saveFile.writeBytes(bytes) }

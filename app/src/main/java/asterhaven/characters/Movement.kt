@@ -23,7 +23,7 @@ class Movement(private val wv : WorldView, private val progress : Progress) {
         val dims : DoubleArray = tileOdds(i, j)
         var roll = Random.nextDouble()
         for(si in 0 until SZ) {
-            if(roll < dims[si]) return progress.randUnseenInScript(si)
+            if(roll < dims[si]) return progress.spawnRandUnspawnedInScript(si)
             else roll -= dims[si]
         }
         return null

@@ -31,6 +31,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
 
     private val paints by lazy {
         val p = Paint()
+        p.color = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnPrimary)
         p.textAlign = Paint.Align.CENTER
         FontFallback.paints(p)
     }
@@ -50,6 +51,8 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
             }
             if(BuildConfig.DEBUG) logToTextView("debug: behind by $t ms", this@WorldView)
         }
+        val progress = (context as MainActivity).progress
+        computedMap.forEach { it.forEach { it.character?.let { progress.mayUnspawn(it) } } }
         //shift map. use temp in (theoretical) case it's still computing its edges
         val range = 0 until EXTENDED_MAP_SIZE
         val mapTemp = Array(EXTENDED_MAP_SIZE) { i ->
@@ -57,7 +60,9 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
                 val x = i + dx
                 val y = j + dy
                 when (x in range && y in range) {
-                    true -> computedMap[x][y]
+                    true -> computedMap[x][y].also {
+                        it.character?.let { progress.didNotUnspawn(it) }
+                    }
                     false -> {
                         movement.requisition(i, j) //Movement will set this coordinate
                         Tile() //dummy return value
@@ -103,9 +108,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
                     drawTileColor(canvas, x, y, shade)
                 }
                 loc.character?.let { c ->
-                    val paint = paints[c.fontIndex].also {
-                        it.color = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnPrimary)
-                    }
+                    val paint = paints[c.fontIndex]
                     canvas?.let { can ->
                         drawCharacter(c, paint, can, x, y)
                         if (i in VISIBLE_RANGE && j in VISIBLE_RANGE) see(c)
@@ -191,7 +194,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
                                 }
                             }
                         }
-                        if(maxsi == -1) Tile() else Tile(progress.randUnseenInScript(maxsi))
+                        if(maxsi == -1) Tile() else Tile(progress.spawnRandUnspawnedInScript(maxsi))
                     }
                     else -> {
                         movement.requisition(i, j)

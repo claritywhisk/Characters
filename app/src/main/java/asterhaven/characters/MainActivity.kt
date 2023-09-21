@@ -115,12 +115,12 @@ class MainActivity : AppCompatActivity() {
         binding.inventory.scriptName.text = script.name
         progressBar = binding.inventory.scriptProgress.also {
             it.max = script.size
-            it.setProgress(progress.seenInScript[Universe.indexOfScript[script]!!], true)
+            it.setProgress(progress.seen.countInScript[Universe.indexOfScript[script]!!], true)
         }
         crossfade(binding.inventory.invTable, binding.inventory.invMatched, false){}
     }
 
-    private fun finishedWithScriptClick(v : View) = finishedWithScript()
+    fun finishedWithScriptClick(v : View) = finishedWithScript()
     fun finishedWithScript(){
         InventorySlot.clearAll()
         //todo picture?
@@ -132,7 +132,10 @@ class MainActivity : AppCompatActivity() {
     fun pictureButtonClick(v : View){
         for(i in Universe.allScripts.indices){
             val s = Universe.allScripts[i]
-            logToTextView("${s.name} ${progress.seenInScript[i]}/${s.size} ${progress.seenScript[i]}")
+            logToTextView("${s.name} " +
+                    "${progress.seen.countInScript[i]}/" +
+                    "${progress.spawnedOrSeen.countInScript[i]}//" +
+                    "${s.size} ${progress.seenScript[i]}")
         }
     }
 

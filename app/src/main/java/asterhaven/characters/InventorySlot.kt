@@ -101,8 +101,8 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(co
                 val occ = occupant ?: return //capture occupant (for thread safety)
                 val p = dragPaints[occ.fontIndex]
                 p.textSize = textSize
-                canvas.drawColor(duplicate_flash.animatedValue as Int)
                 canvas.drawColor(highlight.animatedValue as Int)
+                canvas.drawColor(duplicate_flash.animatedValue as Int)
                 drawCharacter(occ, p, canvas)
             }
         }

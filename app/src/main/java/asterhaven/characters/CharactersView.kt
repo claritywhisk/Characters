@@ -5,6 +5,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import asterhaven.characters.typeface.FontFallback
+import com.google.android.material.color.MaterialColors
 
 abstract class CharactersView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     companion object {
@@ -12,10 +13,7 @@ abstract class CharactersView(context: Context?, attrs: AttributeSet?) : View(co
         const val SHRINK_FACTOR = .8f
     }
 
-    fun see(c : UnicodeCharacter) {
-        val ma = (context as MainActivity)
-        val seenInScript = ma.progress.see(c, ma)
-    }
+    fun see(c : UnicodeCharacter) = (context as MainActivity).run { progress.see(c, this) }
 
     private val rect = Rect()
     val paintTest by lazy {
@@ -67,6 +65,7 @@ abstract class CharactersView(context: Context?, attrs: AttributeSet?) : View(co
     abstract val dragShadowSize : Float
     val dragPaints by lazy {
         val dsp = Paint()
+        dsp.color = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnPrimary)
         dsp.textAlign = Paint.Align.CENTER
         //size is dragShadowSize of the particular view
         FontFallback.paints(dsp)
