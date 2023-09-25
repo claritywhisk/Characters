@@ -33,13 +33,14 @@ class MainActivity : AppCompatActivity() {
         setTheme(R.style.Theme_Characters)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        InventorySlot.init(this)
         setContentView(binding.root)
+        timeTV("FF:LT ",binding.worldView) { FontFallback.loadTypefaces(applicationContext) }
+        InventorySlot.init(this)
+        DragStarter.init(this)
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
         CoroutineScope(Dispatchers.IO).launch {
-            FontFallback.loadTypefaces(applicationContext)
             timeTV("readAllUS", binding.worldView) { Universe.readAllUS(resources) }
             Progress.beginWithSaveFile(File(filesDir, "save"))
             fixedRateTimer("autosave timer", true, SAVE_EVERY, SAVE_EVERY){

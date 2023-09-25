@@ -37,6 +37,10 @@ private const val ODDS_INV_3 = 0.3
 private const val ODDS_INV_4 = 1.0
 val ODDS_INVENTORY = doubleArrayOf(0.0, ODDS_INV_1, ODDS_INV_2, ODDS_INV_3, ODDS_INV_4)
 
+//Drag Shadow size things
+const val ENLARGE_FACTOR = 2.2f
+const val SHRINK_FACTOR = .8f
+
 fun logToTextView(line : String, view : View){
     (view.context as MainActivity).logToTextView(" $line")
 }

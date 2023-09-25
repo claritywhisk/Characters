@@ -38,7 +38,7 @@ class Progress() {
             if(sought) ma.progressBar?.setProgress(x, true)
             if (x == allScripts[scriptI].size) {
                 seenScript[scriptI] = true
-                val toast = Toast.makeText(ma, "Completed ${allScripts[scriptI].name}!", Toast.LENGTH_SHORT)
+                val toast = Toast.makeText(ma, "Completed ${allScripts[scriptI].name}!", Toast.LENGTH_LONG)
                 toast.setGravity(Gravity.TOP, 0, 0)
                 toast.show()
                 ma.logToTextView("Completed ${allScripts[scriptI].name}!")
@@ -47,23 +47,24 @@ class Progress() {
         }
     }
 
-    //todo porpoise of synchonization?
     @Synchronized fun spawnRandUnspawnedInScript(si: Int): UnicodeCharacter? = spawnRandUnmarked(spawnedOrSeen, si)
     @Synchronized fun spawnRandUnseenInScript(si: Int): UnicodeCharacter? = spawnRandUnmarked(seen, si)
-    private fun spawnRandUnmarked(marks: Marks, si: Int): UnicodeCharacter? {
+    @Synchronized private fun spawnRandUnmarked(marks: Marks, si: Int): UnicodeCharacter? {
         val unmarked = allScripts[si].size - marks.countInScript[si]
         if(unmarked <= 0) return null
         var r = Random.nextInt(unmarked)
         //todo with Skip List; test on Han https://en.wikipedia.org/wiki/Skip_list
         var i = scriptStartI[si]
-        while (seen.char[i]) i++
+        while (marks.char[i]) i++
         while (r > 0) {
             r--
             i++
-            while(seen.char[i]) i++
+            while(marks.char[i]) i++
         }
+        if(BuildConfig.DEBUG) check(i < scriptStartI[si] + allScripts[si].size)
         spawnedOrSeen.char[i] = true
-        return UnicodeCharacter.create(si, i - scriptStartI[si]) //TODO? index out of bounds
+        spawnedOrSeen.countInScript[si]++
+        return UnicodeCharacter.create(si, i - scriptStartI[si])
     }
     fun mayUnspawn(c : UnicodeCharacter) = c.i.let {
         if(spawnedOrSeen.char[it] && !seen.char[it]){

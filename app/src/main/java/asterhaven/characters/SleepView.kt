@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.view.View
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import asterhaven.characters.typeface.FontFallback
@@ -12,7 +13,7 @@ import java.lang.RuntimeException
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
-class SleepView(context: Context?, attrs: AttributeSet?) : CharactersView(context, attrs) {
+class SleepView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private lateinit var loc : DoubleArray
     private var sigmadims by Delegates.notNull<Double>()
 
@@ -24,7 +25,7 @@ class SleepView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
     private val progress : Progress
         get() = (context as MainActivity).progress
 
-    override val dragShadowSize = 0f
+    //override val dragShadowSize = 0f
 
     init {
         oldAlpha.startDelay = SLEEP_DELAY
@@ -64,7 +65,7 @@ class SleepView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
         canvas?.let { can ->
             glyphOld?.let { it.draw(can, o)}
             glyphNew?.let { it.draw(can, n)
-                if(n > 192) see(it)
+                if(n > 192) progress.see(it, context as MainActivity)
             }
         }
     }

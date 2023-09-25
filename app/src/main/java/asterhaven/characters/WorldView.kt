@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.View
 import asterhaven.characters.typeface.FontFallback
 import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.Job
@@ -14,12 +15,12 @@ import kotlinx.coroutines.runBlocking
 import java.util.*
 import kotlin.system.measureTimeMillis
 
-const val EXTENDED_MAP_SIZE = SIDE_LENGTH + 4
+const val EXTENDED_MAP_SIZE = SIDE_LENGTH + 4 //todo?
 const val SIDE_LENGTH_EXTENDED = SIDE_LENGTH + 2
 private val LOCAL_RANGE = 1..SIDE_LENGTH_EXTENDED
 private val VISIBLE_RANGE = 2..(SIDE_LENGTH + 1)
 
-class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(context, attrs) {
+class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs), DragStarter {
     companion object { init { require(SIDE_LENGTH % 2 == 1) } }//todo
 
     private val walk = Walk(this) //contains px offsets from current center
@@ -52,7 +53,9 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
             if(BuildConfig.DEBUG) logToTextView("debug: behind by $t ms", this@WorldView)
         }
         val progress = (context as MainActivity).progress
-        computedMap.forEach { it.forEach { it.character?.let { progress.mayUnspawn(it) } } }
+        logToTextView("A ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
+        computedMap.forEach { r -> r.forEach { t -> t.character?.let { progress.mayUnspawn(it) } } }
+        logToTextView("B ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
         //shift map. use temp in (theoretical) case it's still computing its edges
         val range = 0 until EXTENDED_MAP_SIZE
         val mapTemp = Array(EXTENDED_MAP_SIZE) { i ->
@@ -60,7 +63,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
                 val x = i + dx
                 val y = j + dy
                 when (x in range && y in range) {
-                    true -> computedMap[x][y].also {
+                    true -> computedMap[x][y].also { it ->
                         it.character?.let { progress.didNotUnspawn(it) }
                     }
                     false -> {
@@ -70,6 +73,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
                 }
             }
         }
+        logToTextView("C ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
         //with the new map, work can begin on the new coordinates
         computedMap = mapTemp
         updateJob = movement.startUpdate()
@@ -111,7 +115,8 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
                     val paint = paints[c.fontIndex]
                     canvas?.let { can ->
                         drawCharacter(c, paint, can, x, y)
-                        if (i in VISIBLE_RANGE && j in VISIBLE_RANGE) see(c)
+                        if (i in VISIBLE_RANGE && j in VISIBLE_RANGE)
+                                (context as MainActivity).run { progress.see(c, this) }
                     }
                 }
                 y += tileWidthPx
@@ -136,7 +141,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : CharactersView(contex
             it.textSize = (tileWidthPx * SCALE_TEXT2TILE) //.roundToInt().toFloat()
         }
     }
-    private val gestureDetector = GestureApparatus.forWV(getContext(),this)
+    private val gestureDetector = GestureApparatus.gestureDetectorFor(this)
     override fun onTouchEvent(event: MotionEvent): Boolean {
         //super.onTouchEvent(event) //todo verify ok
         gestureDetector.onTouchEvent(event)

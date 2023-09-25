@@ -7,9 +7,10 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.View
 import androidx.core.content.ContextCompat
 
-class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(context, attrs), DragListener {
+class InventorySlot(context: Context?, attrs: AttributeSet?) : View(context, attrs), DragStarter, DragListener {
     companion object Inventory {
         val scriptCount by lazy { IntArray(Universe.allScripts.size) }
         private val inventory = ArrayList<UnicodeCharacter>()
@@ -41,7 +42,6 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(co
     override val dragShadowSize by lazy {
         textSize * SHRINK_FACTOR
     }
-    override var formerOccupantSentToDrag: UnicodeCharacter? = null
     override var occupant : UnicodeCharacter? = null
         set(s) {
             if(s == null) {
@@ -99,7 +99,7 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(co
             }
             else {
                 val occ = occupant ?: return //capture occupant (for thread safety)
-                val p = dragPaints[occ.fontIndex]
+                val p = DragStarter.dragPaints[occ.fontIndex]
                 p.textSize = textSize
                 canvas.drawColor(highlight.animatedValue as Int)
                 canvas.drawColor(duplicate_flash.animatedValue as Int)
@@ -108,7 +108,7 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : CharactersView(co
         }
     }
 
-    private val gestureDetector = GestureApparatus.forInventorySlot(getContext(),this)
+    private val gestureDetector = GestureApparatus.gestureDetectorFor(this)
     override fun onTouchEvent(event: MotionEvent): Boolean {//todo verify ok
         gestureDetector.onTouchEvent(event)
         if((context as MainActivity).inventoryDeleteConfirmation != null && !confirmDelete.isOpen()) return false

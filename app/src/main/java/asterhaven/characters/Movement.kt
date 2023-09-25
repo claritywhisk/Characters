@@ -15,6 +15,7 @@ class Movement(private val wv : WorldView, private val progress : Progress) {
 
     //call async for each new coordinate
     fun startUpdate() = CoroutineScope(Dispatchers.Default).launch {
+        next.shuffle()
         for ((i, j) in next) wv.computedMap[i][j] = DeferredTile( async { computeCharacter(i, j) } )
         next.clear()
     }
@@ -39,15 +40,15 @@ class Movement(private val wv : WorldView, private val progress : Progress) {
                 val dx = newX - mapX
                 val dy = newY - mapY
                 val d = sqrt(0.0 + dx * dx + dy * dy)
-                odds[c.scriptIndex()] +=
-                    ODDS_PARAMETER_SAME_SCRIPT_NEAR_CHARACTER - d * ODDS_LINEAR_DIMINISH_BY_DISTANCE
+                val contrib = ODDS_PARAMETER_SAME_SCRIPT_NEAR_CHARACTER - d * ODDS_LINEAR_DIMINISH_BY_DISTANCE
+                if(contrib > 0.0) odds[c.scriptIndex()] += contrib
             }
         }
         odds.sum().also { if(it > 1.0) for(i in odds.indices) odds[i] /= it }
         return odds
     }
 
-    private val extendedRange = 1..SIDE_LENGTH_EXTENDED
+    private val extendedRange = 1..SIDE_LENGTH_EXTENDED //todo +1 -1 name localMap
     private inline fun forLocalMap(f : (Int, Int, UnicodeCharacter?) -> Unit){
         for(i in extendedRange) for(j in extendedRange) f(i, j, wv.computedMap[i][j].character)
     }

@@ -13,7 +13,7 @@ interface DragListener {
     //abstract properties
     var occupant : UnicodeCharacter?
     fun destination() : DragListener?
-    var formerOccupantSentToDrag : UnicodeCharacter?
+    //var formerOccupantSentToDrag : UnicodeCharacter?
     //@RequiresApi(Build.VERSION_CODES.N)
     fun setOnDragListener() {
         (this as View).setOnDragListener { v, event ->
@@ -42,10 +42,10 @@ interface DragListener {
                     consume
                 }
                 DragEvent.ACTION_DRAG_ENDED -> {
-                    if(formerOccupantSentToDrag != null) {
+                    /*if(formerOccupantSentToDrag != null) {
                         if (event.result) formerOccupantSentToDrag = null
                         else occupant = formerOccupantSentToDrag
-                    }
+                    }*/
                     true
                 }
                 else -> {

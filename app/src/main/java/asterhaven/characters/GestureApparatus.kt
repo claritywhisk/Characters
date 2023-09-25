@@ -1,24 +1,28 @@
 package asterhaven.characters
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
+import android.os.Build
 import android.view.GestureDetector
+import android.view.Gravity
 import android.view.MotionEvent
-import android.widget.FrameLayout
-import android.widget.ImageView
+import android.view.View
+import android.widget.Toast
 
 object GestureApparatus {
-    fun forWV(app: Context, worldView: WorldView): GestureDetector {
-        return GestureDetector(app, object : GestureDetector.SimpleOnGestureListener() {
+    fun gestureDetectorFor(v : View) = GestureDetector(v.context, when(v){
+        is WorldView -> object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapUp(e: MotionEvent?): Boolean {
                 super.onSingleTapUp(e)
-                if (e != null){
-                    val xy = worldView.tileAt(e.x, e.y)
-                    worldView.walkToTile(xy)
-                    worldView.charAt(xy)?.let {
-                        logToTextView("tapped " + it, worldView)
+                if (e != null) {
+                    val xy = v.tileAt(e.x, e.y)
+                    v.walkToTile(xy)
+                    v.charAt(xy)?.let {
+                        logToTextView("tapped " + it, v)
                     }
-                    val char = worldView.charAt(xy)
-                    if(char != null) logToTextView(char.toString(), worldView)
+                    val char = v.charAt(xy)
+                    if (char != null) logToTextView(char.toString(), v)
                 }
                 return true //consume event
             }
@@ -28,35 +32,50 @@ object GestureApparatus {
                 super.onShowPress(e)
                 if (e == null) return
                 val locs = IntArray(2)
-                worldView.getLocationOnScreen(locs)
-                val selected: UnicodeCharacter = worldView.charAt(worldView.tileAt(e.x, e.y)) ?: return
-                worldView.startDragAndDrop(selected)
-                //println("Picked up "+ selected + " ( "+Integer.toHexString(selected.asString.codePoints().toArray()[0])+" )")
+                v.getLocationOnScreen(locs)
+                val selected: UnicodeCharacter =
+                    v.charAt(v.tileAt(e.x, e.y)) ?: return
+                v.startDragAndDrop(selected)
             }
-            //override fun onDown
-            //override fun onLongPress
-            //override fun onScroll
-            //override fun onFling
-            //override fun onSingleTapConfirmed
-            //override fun onDoubleTap
-            //override fun onDoubleTapEvent
-            //override fun onContextClick
-        })
-    }
-
-    fun forInventorySlot(app: Context, inventorySlot: InventorySlot): GestureDetector {
-        return GestureDetector(app, object : GestureDetector.SimpleOnGestureListener() {
+        }
+        is InventorySlot -> object : GestureDetector.SimpleOnGestureListener() {
             override fun onDown(e: MotionEvent?): Boolean {
                 return true
             }
             override fun onSingleTapUp(e: MotionEvent?): Boolean {
-                inventorySlot.confirmDelete.slotTapped()
+                v.confirmDelete.slotTapped()
                 return true
             }
             override fun onLongPress(e: MotionEvent?) {
                 super.onLongPress(e)
-                inventorySlot.confirmDelete.initiate()
+                v.confirmDelete.initiate()
             }
-        })
-    }
+        }
+        is ExaminerView -> object : GestureDetector.SimpleOnGestureListener() {
+            override fun onShowPress(e: MotionEvent?) {
+                super.onShowPress(e)
+                v.occupant?.let { v.startDragAndDrop(it) }
+            }
+
+            override fun onLongPress(e: MotionEvent?) {
+                super.onLongPress(e)
+                v.occupant?.let {
+                    DragListener.beingDragged = null
+                    val clipboard =
+                        v.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip: ClipData = ClipData.newPlainText("Unicode character", it.asString)
+                    clipboard.setPrimaryClip(clip)
+                    if(true){//(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){//todo auto feedback after 31? S_V2
+                        Toast.makeText(v.context, "Copied ${it.asString} to clipboard!", Toast.LENGTH_SHORT).run {
+                            setGravity(Gravity.TOP, 0, 0)
+                            show()
+                        }
+                    }
+                }
+            }
+        }
+        else -> {
+            throw UnsupportedOperationException()
+        }
+    })
 }
