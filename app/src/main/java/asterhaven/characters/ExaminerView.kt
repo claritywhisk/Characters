@@ -4,17 +4,20 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import asterhaven.characters.typeface.FontFallback
 
 @SuppressLint("RestrictedApi")
 class ExaminerView(context: Context, attrs: AttributeSet?) : androidx.appcompat.widget.AppCompatTextView(context, attrs), DragListener, DragStarter {
+    val desc by lazy { (parent as ViewGroup).findViewById<TextView>(R.id.description) }
     val hex by lazy { (parent as ViewGroup).findViewById<TextView>(R.id.hex) }
     override var occupant : UnicodeCharacter? = null
         set(value) {
             if(value != null) typeface = FontFallback.Font.values()[value.fontIndex].getTypeface()
             text = value?.asString ?: ""
+            desc.text = value?.description() ?: ""
             hex.text = value?.hex() ?: ""
             field = value
         }
@@ -27,7 +30,6 @@ class ExaminerView(context: Context, attrs: AttributeSet?) : androidx.appcompat.
     }
     private val gestureDetector = GestureApparatus.gestureDetectorFor(this)
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        //super.onTouchEvent(event) //todo verify ok; performClick
         gestureDetector.onTouchEvent(event)
         if((context as MainActivity).inventoryDeleteConfirmation != null) return false
         return true //https://stackoverflow.com/a/23725322/2563422

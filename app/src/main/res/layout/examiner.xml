@@ -12,12 +12,25 @@
         android:autoSizeTextType="uniform"
         android:gravity="center"
         android:background="@color/light_blue_400"
-        app:layout_constraintVertical_weight="3"
-        app:layout_constraintBottom_toTopOf="@+id/hex"
+        app:layout_constraintVertical_weight="4"
+        app:layout_constraintBottom_toTopOf="@+id/description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:autoSizeTextType="uniform"
+        android:maxLines="1"
+        android:autoSizeMinTextSize="8dp"
+        android:autoSizeMaxTextSize="13dp"
+        android:gravity="center"
+        app:layout_constraintVertical_weight="1"
+        app:layout_constraintTop_toBottomOf="@+id/ex"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/hex" />
     <TextView
         android:id="@+id/hex"
         android:layout_width="0dp"
@@ -25,7 +38,7 @@
         android:autoSizeTextType="uniform"
         android:gravity="center"
         app:layout_constraintVertical_weight="1"
-        app:layout_constraintTop_toBottomOf="@+id/ex"
+        app:layout_constraintTop_toBottomOf="@+id/description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />

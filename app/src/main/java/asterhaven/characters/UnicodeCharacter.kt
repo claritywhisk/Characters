@@ -36,6 +36,8 @@ data class UnicodeCharacter private constructor(val script : UnicodeScript, val 
             throw squawk(asString)
     }
 
+    fun description() = Character.getName(asString.codePointAt(0)) //todo test on all and 2xCP emojis
+
     override fun toString(): String {
         return "${script.name} $asString ${hex()}"
     }

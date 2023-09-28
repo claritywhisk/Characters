@@ -53,9 +53,9 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
             if(BuildConfig.DEBUG) logToTextView("debug: behind by $t ms", this@WorldView)
         }
         val progress = (context as MainActivity).progress
-        logToTextView("A ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
+        //logToTextView("A ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
         computedMap.forEach { r -> r.forEach { t -> t.character?.let { progress.mayUnspawn(it) } } }
-        logToTextView("B ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
+        //logToTextView("B ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
         //shift map. use temp in (theoretical) case it's still computing its edges
         val range = 0 until EXTENDED_MAP_SIZE
         val mapTemp = Array(EXTENDED_MAP_SIZE) { i ->
@@ -73,7 +73,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
                 }
             }
         }
-        logToTextView("C ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
+        //logToTextView("C ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
         //with the new map, work can begin on the new coordinates
         computedMap = mapTemp
         updateJob = movement.startUpdate()

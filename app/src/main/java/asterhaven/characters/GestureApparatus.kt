@@ -3,11 +3,11 @@ package asterhaven.characters
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.os.Build
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.Toast
 
 object GestureApparatus {
@@ -39,6 +39,7 @@ object GestureApparatus {
             }
         }
         is InventorySlot -> object : GestureDetector.SimpleOnGestureListener() {
+            var dragAndDropIfNotLongPress: Runnable? = null
             override fun onDown(e: MotionEvent?): Boolean {
                 return true
             }
@@ -46,19 +47,32 @@ object GestureApparatus {
                 v.confirmDelete.slotTapped()
                 return true
             }
+            override fun onShowPress(e: MotionEvent?) {
+                super.onShowPress(e)
+                val t = ViewConfiguration.getLongPressTimeout() - ViewConfiguration.getTapTimeout()
+                v.occupant?.let {
+                    dragAndDropIfNotLongPress = Runnable(){ v.startDragAndDrop(it) }
+                    v.postDelayed(dragAndDropIfNotLongPress, t.toLong())
+                }
+            }
             override fun onLongPress(e: MotionEvent?) {
                 super.onLongPress(e)
+                v.removeCallbacks(dragAndDropIfNotLongPress)
                 v.confirmDelete.initiate()
             }
         }
         is ExaminerView -> object : GestureDetector.SimpleOnGestureListener() {
+            var dragAndDropIfNotLongPress: Runnable? = null
             override fun onShowPress(e: MotionEvent?) {
-                super.onShowPress(e)
-                v.occupant?.let { v.startDragAndDrop(it) }
+                val t = ViewConfiguration.getLongPressTimeout() - ViewConfiguration.getTapTimeout()
+                v.occupant?.let {
+                    dragAndDropIfNotLongPress = Runnable(){ v.startDragAndDrop(it) }
+                    v.postDelayed(dragAndDropIfNotLongPress, t.toLong())
+                }
             }
 
             override fun onLongPress(e: MotionEvent?) {
-                super.onLongPress(e)
+                v.removeCallbacks(dragAndDropIfNotLongPress)
                 v.occupant?.let {
                     DragListener.beingDragged = null
                     val clipboard =
