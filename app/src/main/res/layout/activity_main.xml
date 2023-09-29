@@ -21,37 +21,14 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <include
-        android:id="@+id/examiner"
-        layout="@layout/examiner"
+        android:id="@+id/main_panel"
+        layout="@layout/panel"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="1"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toRightOf="@+id/inventory"
-        app:layout_constraintRight_toLeftOf="@+id/buttons"
-        app:layout_constraintTop_toBottomOf="@id/world_view" />
-
-    <include
-        android:id="@+id/inventory"
-        layout="@layout/inventory"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="1"
-        app:layout_constraintEnd_toStartOf="@id/examiner"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/world_view" />
-
-    <include
-        android:id="@+id/buttons"
-        layout="@layout/buttons"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/examiner"
-        app:layout_constraintTop_toBottomOf="@id/world_view" />
+        app:layout_constraintTop_toBottomOf="@id/world_view"
+        app:layout_constraintBottom_toTopOf="@id/textView"/>
 
     <TextView
         android:id="@+id/textView"
@@ -62,6 +39,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/examiner" />
+        app:layout_constraintTop_toBottomOf="@id/main_panel" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

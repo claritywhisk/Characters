@@ -13,6 +13,7 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.databinding.ActivityMainBinding
+import asterhaven.characters.databinding.InventoryBinding
 import asterhaven.characters.unicodescript.UnicodeScript
 import kotlinx.coroutines.*
 import java.io.File
@@ -20,7 +21,7 @@ import kotlin.concurrent.fixedRateTimer
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    //private lateinit var invBinding : InventoryBinding //included layout
+    private lateinit var inventory: InventoryBinding
     private lateinit var mediaPlayer : MediaPlayer
 
     val progress by Progress
@@ -33,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         setTheme(R.style.Theme_Characters)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        inventory = binding.mainPanel.inventory
         setContentView(binding.root)
         timeTV("FF:LT ",binding.worldView) { FontFallback.loadTypefaces(applicationContext) }
         InventorySlot.init(this)
@@ -113,19 +115,19 @@ class MainActivity : AppCompatActivity() {
 
     fun inventoryMatched(script : UnicodeScript){
         matched4 = script
-        binding.inventory.scriptName.text = script.name
-        progressBar = binding.inventory.scriptProgress.also {
+        inventory.scriptName.text = script.name
+        progressBar = inventory.scriptProgress.also {
             it.max = script.size
             it.setProgress(progress.seen.countInScript[Universe.indexOfScript[script]!!], true)
         }
-        crossfade(binding.inventory.invTable, binding.inventory.invMatched, false){}
+        crossfade(inventory.invTable, inventory.invMatched, false){}
     }
 
     fun finishedWithScriptClick(v : View) = finishedWithScript()
     fun finishedWithScript(){
         InventorySlot.clearAll()
         //todo picture?
-        crossfade(binding.inventory.invMatched, binding.inventory.invTable, false){}
+        crossfade(inventory.invMatched, inventory.invTable, false){}
         progressBar = null
         matched4 = null
     }
