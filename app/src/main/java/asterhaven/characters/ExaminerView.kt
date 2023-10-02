@@ -34,6 +34,9 @@ class ExaminerView(context: Context, attrs: AttributeSet?) : androidx.appcompat.
         if((context as MainActivity).inventoryDeleteConfirmation != null) return false
         return true //https://stackoverflow.com/a/23725322/2563422
     }
+    override fun toString() : String {
+        return "ExView ${occupant?.asString} ${this.transitionName}"
+    }
 }
     /*companion object {
         const val FRACTION_NON_LABEL = 3f / 4f

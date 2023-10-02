@@ -5,15 +5,24 @@ import android.animation.AnimatorListenerAdapter
 import android.content.res.Configuration
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.transition.TransitionManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.allViews
+import androidx.core.view.children
+import androidx.core.view.updateLayoutParams
 import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.databinding.ActivityMainBinding
 import asterhaven.characters.databinding.InventoryBinding
+import asterhaven.characters.databinding.PanelBinding
 import asterhaven.characters.unicodescript.UnicodeScript
 import kotlinx.coroutines.*
 import java.io.File
@@ -21,6 +30,7 @@ import kotlin.concurrent.fixedRateTimer
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var mainPanel: PanelBinding
     private lateinit var inventory: InventoryBinding
     private lateinit var mediaPlayer : MediaPlayer
 
@@ -34,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         setTheme(R.style.Theme_Characters)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        mainPanel = binding.mainPanel
         inventory = binding.mainPanel.inventory
         setContentView(binding.root)
         timeTV("FF:LT ",binding.worldView) { FontFallback.loadTypefaces(applicationContext) }
@@ -158,11 +169,46 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun catalogButtonClick(v : View){
-        Progress.clearProgress()
-        logToTextView("Reset progress")
+        println("Hallo")
+        TransitionManager.beginDelayedTransition(binding.root)
+        val mp = mainPanel.root
+        binding.root.removeAllViews()
+
+        val cat = layoutInflater.inflate(R.layout.catalog, null)
+
+        binding.root.addView(mp)
+        binding.root.addView(cat)
+        mp.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            width = ConstraintLayout.LayoutParams.MATCH_PARENT
+            height = ConstraintLayout.LayoutParams.WRAP_CONTENT
+            startToStart = binding.root.id
+            topToBottom = cat.id
+            endToEnd = binding.root.id
+            bottomToBottom = binding.root.id
+        }
+        cat.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            width = ConstraintLayout.LayoutParams.MATCH_PARENT
+            height = 0//binding.root.height - mp.height.also { println("height $it")} //TODO hack, also wrong
+            horizontalWeight = 1f
+            verticalWeight = 1f
+            startToStart = binding.root.id
+            topToTop = binding.root.id
+            endToEnd = binding.root.id
+            bottomToTop = mp.id
+        }
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            binding.root.let { println("(Root) ${it.javaClass}  " + it.width +","+it.height) }
+            binding.root.children.forEach { println("${if(it.id != View.NO_ID) it.resources.getResourceName(it.id) else "x"} " +
+                    "${it.javaClass}  " + it.width +","+it.height) }
+            //binding.root.findViewById<ConstraintLayout>(R.id.main_panel).children.forEach {
+            //    println("${if(it.id != View.NO_ID) it.resources.getResourceName(it.id) else "x"} " +
+            //        "${it.javaClass}  " + it.width +","+it.height) }
+        }, 2000)
     }
     fun settingsButtonClick(v : View){
-        //todo
+        Progress.clearProgress()
+        logToTextView("Reset progress")
     }
 
     //https://developer.android.com/training/animation/reveal-or-hide-view#Crossfade
