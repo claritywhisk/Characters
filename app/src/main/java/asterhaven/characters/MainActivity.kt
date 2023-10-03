@@ -30,7 +30,6 @@ import kotlin.concurrent.fixedRateTimer
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var mainPanel: PanelBinding
     private lateinit var inventory: InventoryBinding
     private lateinit var mediaPlayer : MediaPlayer
 
@@ -44,7 +43,6 @@ class MainActivity : AppCompatActivity() {
         setTheme(R.style.Theme_Characters)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        mainPanel = binding.mainPanel
         inventory = binding.mainPanel.inventory
         setContentView(binding.root)
         timeTV("FF:LT ",binding.worldView) { FontFallback.loadTypefaces(applicationContext) }
@@ -169,33 +167,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun catalogButtonClick(v : View){
-        println("Hallo")
-        TransitionManager.beginDelayedTransition(binding.root)
-        val mp = mainPanel.root
-        binding.root.removeAllViews()
-
-        val cat = layoutInflater.inflate(R.layout.catalog, null)
-
-        binding.root.addView(mp)
-        binding.root.addView(cat)
-        mp.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            width = ConstraintLayout.LayoutParams.MATCH_PARENT
-            height = ConstraintLayout.LayoutParams.WRAP_CONTENT
-            startToStart = binding.root.id
-            topToBottom = cat.id
-            endToEnd = binding.root.id
-            bottomToBottom = binding.root.id
+        //todo if sleep, cancel it
+        if(!Catalog.didFirstAppear){
+            Catalog.activate(binding, layoutInflater.inflate(R.layout.catalog, null))
         }
-        cat.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            width = ConstraintLayout.LayoutParams.MATCH_PARENT
-            height = 0//binding.root.height - mp.height.also { println("height $it")} //TODO hack, also wrong
-            horizontalWeight = 1f
-            verticalWeight = 1f
-            startToStart = binding.root.id
-            topToTop = binding.root.id
-            endToEnd = binding.root.id
-            bottomToTop = mp.id
-        }
+        Catalog.toggle(binding)
 
         Handler(Looper.getMainLooper()).postDelayed({
             binding.root.let { println("(Root) ${it.javaClass}  " + it.width +","+it.height) }
