@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
                 Progress.save(progress)
             }
             CoroutineScope(Dispatchers.Main).launch {
-                binding.textView.typeface = FontFallback.Font.GNU_UNIFONT.getTypeface() //todo dynamic
+                binding.mainLogTextView.typeface = FontFallback.Font.GNU_UNIFONT.getTypeface() //todo dynamic
                 binding.worldView.doInit(progress)
                 /*CoroutineScope(Dispatchers.Default).launch {
                     var x = 0
@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun logToTextView(line : String) =
-        runOnUiThread { binding.textView.append(line + "\n") }
+        runOnUiThread { binding.mainLogTextView.append(line + "\n") }
 
     fun inventoryMatched(script : UnicodeScript){
         matched4 = script
@@ -168,19 +168,8 @@ class MainActivity : AppCompatActivity() {
 
     fun catalogButtonClick(v : View){
         //todo if sleep, cancel it
-        if(!Catalog.didFirstAppear){
-            Catalog.activate(binding, layoutInflater.inflate(R.layout.catalog, null))
-        }
+        Catalog.initIfUninitialized(binding, this)
         Catalog.toggle(binding)
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            binding.root.let { println("(Root) ${it.javaClass}  " + it.width +","+it.height) }
-            binding.root.children.forEach { println("${if(it.id != View.NO_ID) it.resources.getResourceName(it.id) else "x"} " +
-                    "${it.javaClass}  " + it.width +","+it.height) }
-            //binding.root.findViewById<ConstraintLayout>(R.id.main_panel).children.forEach {
-            //    println("${if(it.id != View.NO_ID) it.resources.getResourceName(it.id) else "x"} " +
-            //        "${it.javaClass}  " + it.width +","+it.height) }
-        }, 2000)
     }
     fun settingsButtonClick(v : View){
         Progress.clearProgress()

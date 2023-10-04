@@ -6,8 +6,9 @@ import kotlin.system.measureTimeMillis
 const val MUTE = true
 
 const val DEBUG_SMALL_SCRIPTS = true
-const val DEBUG_MAX_SCRIPT_SIZE = 20
+const val DEBUG_MAX_SCRIPT_SIZE = 30
 const val DEBUG_GLYPH_BOUNDS = false
+const val DEBUG_RESET_PROGRESS = false//true
 
 val CHAOS : Double = if(DEBUG_SMALL_SCRIPTS) .1 else .0003 //upper bound of test random
 

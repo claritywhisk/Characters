@@ -5,4 +5,5 @@
     <string name="menu_sound_on">Sound: On</string>
     <string name="menu_sound_off">Sound: Off</string>
     <string name="script_done_button">Leave</string>
+    <string name="cat_recent_chars_title">Recent</string>
 </resources>

@@ -1,8 +1,10 @@
 package asterhaven.characters
 
 import android.view.Gravity
+import android.view.View
 import android.widget.Toast
 import asterhaven.characters.Universe.allScripts
+import asterhaven.characters.unicodescript.UnicodeScript
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.random.Random
@@ -78,6 +80,7 @@ class Progress() {
             spawnedOrSeen.countInScript[c.scriptIndex()]++
         }
     }
+    fun seen(s : UnicodeScript, i : Int) = seen.char[scriptStartI[Universe.indexOfScript[s]!!] + i]
     private val UnicodeCharacter.i get() = scriptStartI[this.scriptIndex()] + this.indexInScript
 
     companion object {
@@ -86,10 +89,11 @@ class Progress() {
         private lateinit var progress : Progress
         private lateinit var progressAsync : Deferred<Progress>
         private var lazyLoadedFlag = false
-        operator fun getValue(mainActivity: MainActivity, property: KProperty<*>): Progress {
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): Progress {
             if(lazyLoadedFlag) return progress
             progress = runBlocking { progressAsync.await() }
-            if(BuildConfig.DEBUG) mainActivity.logToTextView("Started with ${progress.seen.char.cardinality()} chars")
+            if(BuildConfig.DEBUG && thisRef is MainActivity)
+                thisRef.logToTextView("Started with ${progress.seen.char.cardinality()} chars")
             lazyLoadedFlag = true
             return progress
         }
@@ -133,7 +137,7 @@ class Progress() {
         fun beginWithSaveFile(f : File){
             saveFile = f
             check(lazyLoadedFlag == false)
-            if(saveFile.exists()) CoroutineScope(Dispatchers.IO).launch {
+            if(saveFile.exists() && !DEBUG_RESET_PROGRESS) CoroutineScope(Dispatchers.IO).launch {
                 progressAsync = loadAsync(saveFile)
             }
             else clearProgress()
