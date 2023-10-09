@@ -31,11 +31,8 @@ class ExaminerView(context: Context, attrs: AttributeSet?) : androidx.appcompat.
     private val gestureDetector = GestureApparatus.gestureDetectorFor(this)
     override fun onTouchEvent(event: MotionEvent): Boolean {
         gestureDetector.onTouchEvent(event)
-        if((context as MainActivity).inventoryDeleteConfirmation != null) return false
+        if ((context as MainActivity).inventoryDeleteConfirmation != null) return false
         return true //https://stackoverflow.com/a/23725322/2563422
-    }
-    override fun toString() : String {
-        return "ExView ${occupant?.asString} ${this.transitionName}"
     }
 }
     /*companion object {

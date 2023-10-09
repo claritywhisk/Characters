@@ -1,7 +1,6 @@
 package asterhaven.characters
 
 import android.view.Gravity
-import android.view.View
 import android.widget.Toast
 import asterhaven.characters.Universe.allScripts
 import asterhaven.characters.unicodescript.UnicodeScript
@@ -9,6 +8,7 @@ import kotlinx.coroutines.*
 import java.util.*
 import kotlin.random.Random
 import java.io.File
+import kotlin.collections.ArrayDeque
 import kotlin.reflect.KProperty
 
 //Todo versioning smooth transition when game updates
@@ -20,6 +20,8 @@ class Progress() {
     val seen: Marks
     val spawnedOrSeen : Marks
     val seenScript = BooleanArray(allScripts.size) //flags for script completion
+    val recentQueue = ArrayDeque<UnicodeCharacter>(PROGRESS_RECENT_SIZE)
+
     private val scriptStartI: IntArray
     init {
         var n = 0
@@ -35,6 +37,10 @@ class Progress() {
         val scriptI = c.scriptIndex()
         if (!seen.char[c.i]) {
             seen.char[c.i] = true
+            recentQueue.apply{
+                if(size == PROGRESS_RECENT_SIZE) removeLast()
+                addFirst(c)
+            }
             val x = ++seen.countInScript[scriptI]
             val sought = c.script == ma.matched4
             if(sought) ma.progressBar?.setProgress(x, true)

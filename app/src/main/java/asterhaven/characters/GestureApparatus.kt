@@ -88,6 +88,12 @@ object GestureApparatus {
                 }
             }
         }
+        is CatalogTileView -> object : GestureDetector.SimpleOnGestureListener() {
+            override fun onShowPress(e: MotionEvent?) {
+                super.onShowPress(e)
+                v.occupant?.let{ v.startDragAndDrop(it) }
+            }
+        }
         else -> {
             throw UnsupportedOperationException()
         }
