@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mediaPlayer : MediaPlayer
 
     val progress by Progress
+    val movement by Movement
     var progressBar : ProgressBar? = null
     var matched4 : UnicodeScript? = null
     var inventoryDeleteConfirmation : InventorySlot.ConfirmDeleteStatus? = null
@@ -154,7 +155,7 @@ class MainActivity : AppCompatActivity() {
     fun sleepButtonClick(z : View){
         when(binding.worldView.visibility){
             View.VISIBLE -> {
-                binding.sleepView.setLocation(binding.worldView.movement.sleepScriptDims())
+                binding.sleepView.setLocation(movement.sleepScriptDims())
                 crossfade(binding.worldView, binding.sleepView, false){
                     binding.sleepView.sleep()
                 }

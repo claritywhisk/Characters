@@ -24,7 +24,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
     companion object { init { require(SIDE_LENGTH % 2 == 1) } }//todo
 
     private val walk = Walk(this) //contains px offsets from current center
-    lateinit var movement : Movement
+    private val movement by Movement
 
     override val dragShadowSize by lazy {
         ENLARGE_FACTOR * SCALE_TEXT2TILE * tileWidthPx
@@ -53,9 +53,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
             if(BuildConfig.DEBUG) logToTextView("debug: behind by $t ms", this@WorldView)
         }
         val progress = (context as MainActivity).progress
-        //logToTextView("A ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
         computedMap.forEach { r -> r.forEach { t -> t.character?.let { progress.mayUnspawn(it) } } }
-        //logToTextView("B ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
         //shift map. use temp in (theoretical) case it's still computing its edges
         val range = 0 until EXTENDED_MAP_SIZE
         val mapTemp = Array(EXTENDED_MAP_SIZE) { i ->
@@ -73,13 +71,18 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
                 }
             }
         }
-        //logToTextView("C ${progress.spawnedOrSeen.countInScript.contentToString()}", this)
         //with the new map, work can begin on the new coordinates
         computedMap = mapTemp
-        updateJob = movement.startUpdate()
-        val t = System.currentTimeMillis()
-        updateJob!!.invokeOnCompletion {
-            //logToTextView("M update "+(System.currentTimeMillis() - t), this) //todo?
+        movement.startUpdate()
+    }
+
+    fun outerComputedMapCoords() = Array<Pair<Int, Int>>(4 * (EXTENDED_MAP_SIZE - 1)){ i ->
+        val s = EXTENDED_MAP_SIZE
+        when {
+            i < s     -> Pair(i, 0)
+            i < s * 2 -> Pair(s - 1, i - s)
+            i < s * 3 -> Pair(s - 1 - i % s, s - 1)
+            else      -> Pair(0, s - 1 - i % s)
         }
     }
 
@@ -183,7 +186,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
     }
 
     fun doInit(progress : Progress){
-        movement = Movement(this, progress) //like most lines, a must!
+        Movement.init(this, walk) //like most lines, a must!
         computedMap = Array(EXTENDED_MAP_SIZE) { i ->
             Array(EXTENDED_MAP_SIZE) { j ->
                 when {

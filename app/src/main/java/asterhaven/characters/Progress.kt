@@ -90,7 +90,7 @@ class Progress() {
     private val UnicodeCharacter.i get() = scriptStartI[this.scriptIndex()] + this.indexInScript
 
     companion object {
-        lateinit var saveFile : File
+        private lateinit var saveFile : File
         private var saveJob : Job? = null
         private lateinit var progress : Progress
         private lateinit var progressAsync : Deferred<Progress>
@@ -142,7 +142,7 @@ class Progress() {
 
         fun beginWithSaveFile(f : File){
             saveFile = f
-            check(lazyLoadedFlag == false)
+            check(!lazyLoadedFlag)
             if(saveFile.exists() && !DEBUG_RESET_PROGRESS) CoroutineScope(Dispatchers.IO).launch {
                 progressAsync = loadAsync(saveFile)
             }

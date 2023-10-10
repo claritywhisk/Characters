@@ -19,6 +19,7 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : View(context, att
             get() = allSlots.firstOrNull { slot -> slot.occupant == null }
         lateinit var trashCanDrawable: Drawable
         lateinit var matchColors: List<Int>
+        private val movement by Movement
         fun clearAll() = allSlots.forEach { it.occupant = null }
         fun init(c : Context){
             trashCanDrawable = ContextCompat.getDrawable(c, android.R.drawable.ic_menu_delete)!!
@@ -48,6 +49,7 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : View(context, att
                 field?.let {
                     inventory.remove(it)
                     scriptCount[it.scriptIndex()]--
+                    movement.inventoryChange()
                 }
                 field = s
                 invalidate()
@@ -58,10 +60,10 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : View(context, att
                 return
             }
             else {
-                logToTextView(s.toString(), this)
                 field = s
                 invalidate()
                 inventory.add(s)
+                movement.inventoryChange()
                 val x = ++scriptCount[s.scriptIndex()]
                 if(inventory.size == allSlots.size){
                     if(x == allSlots.size) {

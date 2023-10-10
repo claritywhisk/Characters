@@ -67,5 +67,6 @@ class Coffin(val c : Coordinate) : CoordinateWrapper {
 
 open class Tile(open val character : UnicodeCharacter? = null)
 class DeferredTile(private val c : Deferred<UnicodeCharacter?>?) : Tile() {
-    override val character by lazy { runBlocking { c?.await() } }
+    var cancel = false
+    override val character by lazy { if(cancel) null else runBlocking { c?.await() } }
 }

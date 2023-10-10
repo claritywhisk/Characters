@@ -3,8 +3,21 @@ package asterhaven.characters
 import kotlinx.coroutines.*
 import kotlin.math.sqrt
 import kotlin.random.Random
+import kotlin.reflect.KProperty
 
-class Movement(private val wv : WorldView, private val progress : Progress) {
+class Movement() {
+    companion object {
+        private lateinit var wv : WorldView
+        private lateinit var walk : Walk
+        private val progress by Progress
+        private val movement by lazy { Movement() }
+        operator fun getValue(thisRef: Any?, property: KProperty<*>): Movement = movement
+        fun init(wv : WorldView, w : Walk){
+            check(!::wv.isInitialized)
+            this.wv = wv
+            this.walk = w
+        }
+    }
     val SZ = Universe.allScripts.size
     //val LOCAL_MAP_TILES = SIDE_LENGTH_EXTENDED * SIDE_LENGTH_EXTENDED
     val center = SIDE_LENGTH_EXTENDED / 2
@@ -14,10 +27,13 @@ class Movement(private val wv : WorldView, private val progress : Progress) {
     fun requisition(i : Int, j : Int) = next.add(Pair(i, j))
 
     //call async for each new coordinate
-    fun startUpdate() = CoroutineScope(Dispatchers.Default).launch {
-        next.shuffle()
-        for ((i, j) in next) wv.computedMap[i][j] = DeferredTile( async { computeCharacter(i, j) } )
-        next.clear()
+    private var updateJob : Job? = null
+    fun startUpdate() {
+        updateJob = CoroutineScope(Dispatchers.Default).launch {
+            next.shuffle()
+            for ((i, j) in next) wv.computedMap[i][j] = DeferredTile( async { computeCharacter(i, j) } )
+            next.clear()
+        }
     }
 
     private fun computeCharacter(i: Int, j: Int): UnicodeCharacter? {
@@ -54,4 +70,20 @@ class Movement(private val wv : WorldView, private val progress : Progress) {
     }
 
     fun sleepScriptDims() : DoubleArray = tileOdds(EXTENDED_MAP_SIZE/2, EXTENDED_MAP_SIZE/2)
+
+    fun inventoryChange(){
+        if(walk.stopped){
+            runBlocking {
+                updateJob?.join()
+            }
+            wv.outerComputedMapCoords().forEach {
+                wv.computedMap[it.first][it.second].let { tile ->
+                    if(tile is DeferredTile) tile.cancel = true
+                    tile.character?.let { c -> progress.mayUnspawn(c) }
+                }
+                movement.requisition(it.first, it.second)
+            }
+            startUpdate()
+        }
+    }
 }

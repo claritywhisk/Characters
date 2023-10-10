@@ -13,6 +13,7 @@ class Walk (private val wView : WorldView) : TimeAnimator.TimeListener {
         private val FULLSTOPSTARTDIST = constAccDist(T_CRUISE_BEGIN, A)
         private fun constAccDist(t : Float, a : Float, v_0 : Float = 0f) = v_0*t + a*t*t/2f
     }
+    var stopped = true
     //displacement from wView.centerCoordinate, up to 1/2 Tile
     var xOffset = o
     var yOffset = o
@@ -94,6 +95,7 @@ class Walk (private val wView : WorldView) : TimeAnimator.TimeListener {
         currentAnimation = TimeAnimator()
         currentAnimation.setTimeListener(this)
         currentAnimation.start()
+        stopped = false
     }
 
     ///@RequiresApi(Build.VERSION_CODES.O)
@@ -105,7 +107,10 @@ class Walk (private val wView : WorldView) : TimeAnimator.TimeListener {
         //manage time
         val end = max(tNormalStop, tStoppingStop)
         t = min(end, totalTime/1000f)
-        if(t == end) animation.end()
+        if(t == end) {
+            animation.end()
+            stopped = true
+        }
         //integrate accelerations twice
         val dStoppingX = constAccDist(tStopping(), aStoppingX, vXStopping)
         val dStoppingY = constAccDist(tStopping(), aStoppingY, vYStopping)
