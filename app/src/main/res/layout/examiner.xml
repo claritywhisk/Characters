@@ -22,7 +22,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:autoSizeTextType="uniform"
-        android:maxLines="1"
+        android:singleLine="true"
         android:ellipsize="marquee"
         android:marqueeRepeatLimit ="marquee_forever"
         android:autoSizeMinTextSize="10dp"

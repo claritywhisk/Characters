@@ -18,6 +18,7 @@ class ExaminerView(context: Context, attrs: AttributeSet?) : androidx.appcompat.
             if(value != null) typeface = FontFallback.Font.values()[value.fontIndex].getTypeface()
             text = value?.asString ?: ""
             desc.text = value?.description() ?: ""
+            desc.isSelected = true
             hex.text = value?.hex() ?: ""
             field = value
         }
