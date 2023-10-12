@@ -4,11 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
+    <ImageButton
         android:id="@+id/picture"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:onClick="pictureButtonClick"
+        android:src="@drawable/baseline_photo_camera_24"
         app:layout_constraintBottom_toTopOf="@id/catalog"
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toStartOf="@id/z"
@@ -16,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_percent="0.5" />
 
-    <Button
+    <ImageButton
         android:id="@+id/z"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -30,11 +31,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_percent="0.5" />
 
-    <Button
+    <ImageButton
         android:id="@+id/catalog"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:onClick="catalogButtonClick"
+        android:src="@drawable/baseline_grid_on_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toStartOf="@id/settings"
@@ -42,11 +44,12 @@
         app:layout_constraintTop_toBottomOf="@id/picture"
         app:layout_constraintWidth_percent="0.5" />
 
-    <Button
+    <ImageButton
         android:id="@+id/settings"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:onClick="settingsButtonClick"
+        android:src="@drawable/baseline_settings_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toEndOf="parent"
