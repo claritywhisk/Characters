@@ -39,7 +39,7 @@ data class UnicodeCharacter private constructor(val script : UnicodeScript, val 
     fun description() = Character.getName(asString.codePointAt(0)) //todo test on all and 2xCP emojis
 
     override fun toString(): String {
-        return "${script.name} $asString ${hex()}"
+        return "${hex()} ${script.name} $asString"
     }
     fun hex() = asString.codePointAt(0).toString(16).uppercase()
     fun scriptIndex() = Universe.indexOfScript[script]!!

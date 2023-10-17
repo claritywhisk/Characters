@@ -11,6 +11,7 @@ import android.view.ViewConfiguration
 import android.widget.Toast
 
 object GestureApparatus {
+    lateinit var examinerView: ExaminerView
     fun gestureDetectorFor(v : View) = GestureDetector(v.context, when(v){
         is WorldView -> object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapUp(e: MotionEvent?): Boolean {
@@ -19,10 +20,8 @@ object GestureApparatus {
                     val xy = v.tileAt(e.x, e.y)
                     v.walkToTile(xy)
                     v.charAt(xy)?.let {
-                        logToTextView("tapped " + it, v)
+                        examinerView.occupant = it
                     }
-                    val char = v.charAt(xy)
-                    if (char != null) logToTextView(char.toString(), v)
                 }
                 return true //consume event
             }

@@ -5,16 +5,15 @@ import kotlin.system.measureTimeMillis
 
 const val MUTE = true
 
-const val DEBUG_SMALL_SCRIPTS = true
+const val DEBUG_SMALL_SCRIPTS = false
 const val DEBUG_MAX_SCRIPT_SIZE = 30
 const val DEBUG_GLYPH_BOUNDS = false
-const val DEBUG_RESET_PROGRESS = false//true
-
+const val DEBUG_RESET_PROGRESS = true
 val CHAOS : Double = if(DEBUG_SMALL_SCRIPTS) .1 else .0003 //upper bound of test random
 
 //worldview speed
 const val A = 1.3f//1f //(tiles/second)/second
-const val V_MAX = 2.2f//1.75f //tiles/second
+const val V_MAX = 2.05f//1.75f 2.2f //tiles/second
 //worldview size
 const val SIDE_LENGTH = 7
 
@@ -30,8 +29,8 @@ const val SLEEP_DELAY = 1800L
 const val WIDTH_TEXT_SIZE_RATIO = 2.5f
 
 const val ODDS_BASE_CHARACTER_PREVALENCE = 0.15
-const val ODDS_PARAMETER_SAME_SCRIPT_NEAR_CHARACTER = 0.05
-const val ODDS_LINEAR_DIMINISH_BY_DISTANCE = 0.01
+const val ODDS_PARAMETER_SAME_SCRIPT_NEAR_CHARACTER = 0.04
+const val ODDS_LINEAR_DIMINISH_BY_DISTANCE = 0.007
 private const val ODDS_INV_1 = 0.1
 private const val ODDS_INV_2 = 0.2
 private const val ODDS_INV_3 = 0.3

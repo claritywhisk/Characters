@@ -15,7 +15,10 @@ class ExaminerView(context: Context, attrs: AttributeSet?) : androidx.appcompat.
     val hex by lazy { (parent as ViewGroup).findViewById<TextView>(R.id.hex) }
     override var occupant : UnicodeCharacter? = null
         set(value) {
-            if(value != null) typeface = FontFallback.Font.values()[value.fontIndex].getTypeface()
+            if(value != null){
+                (context as MainActivity).logToTextView(value.toString())
+                typeface = FontFallback.Font.values()[value.fontIndex].getTypeface()
+            }
             text = value?.asString ?: ""
             desc.text = value?.description() ?: ""
             desc.isSelected = true

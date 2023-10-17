@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         inventory = binding.mainPanel.inventory
+        GestureApparatus.examinerView = binding.mainPanel.examiner.ex
         setContentView(binding.root)
         timeTV("FF:LT ",binding.worldView) { FontFallback.loadTypefaces(applicationContext) }
         InventorySlot.init(this)
