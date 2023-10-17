@@ -117,7 +117,7 @@ class GlyphActivity : AppCompatActivity() {
             }
             pairs.append(String(intArrayOf(range.codepoint, range.codepointEnd), 0, 2))
         }
-        return UnicodeScript(name, pairs.toString())
+        return UnicodeScript(name.replace('_',' '), pairs.toString())
     }
     
     override fun onCreate(savedInstanceState: Bundle?) {
