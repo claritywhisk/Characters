@@ -32,7 +32,7 @@ private const val expected = 199
 class GlyphActivity : AppCompatActivity() {
     var testValues = intArrayOf(0x11265, 0x16B5A, 0x16ACA, 0x10EAA)
     private fun glyph(file: File){
-        val fast = false //Turn on to skip the Unknown script (87% of codepoints, < 1/6 of glyphs)
+        val fast = true //Turn on to skip the Unknown script (87% of codepoints, < 1/6 of glyphs)
         var uSize = 0
         var strings = false
         val list = ArrayList<UnicodeScript>()
@@ -93,12 +93,17 @@ class GlyphActivity : AppCompatActivity() {
             }
         }
         print("${list.size} scripts... ")
+        val json : String
         val t = measureTimeMillis {
-            val json = encodeAllUS(list)
-            file.createNewFile()
-            file.writeText(json)
+            json = encodeAllUS(list)
         }
         println(" to JSON in ${"%.3f".format(t.toDouble() / 1000)} s")
+        println("created file? " +file.createNewFile())
+        val t2 = measureTimeMillis {
+            file.writeText(json)
+        }
+        println("wrote to file in ${"%.3f".format(t2.toDouble() / 1000)} s")
+        println("look for${file.absolutePath}")
         println("Unicode codepoints examined: $uSize")
         println("Glyphs found: ${list.fold(0){ sum, script -> sum + script.size}}")
         println("Scripts: ${list.size}")
@@ -140,7 +145,8 @@ class GlyphActivity : AppCompatActivity() {
         require(requestCode == 66)
         println("ON REQUEST PERMISSIONS RESULT")
         thread {
-            val dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+            val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            println("File absolute path: " + dir?.absolutePath ?: "error")
             val file = File(dir, "scripts.txt")
             val t = measureTimeMillis {
                 glyph(file)
