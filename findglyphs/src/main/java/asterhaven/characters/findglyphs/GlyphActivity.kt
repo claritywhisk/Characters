@@ -14,7 +14,6 @@ import asterhaven.characters.unicodescript.UnicodeScript
 import asterhaven.characters.unicodescript.encodeAllUS
 import java.io.File
 import java.lang.StringBuilder
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 import kotlin.reflect.full.staticProperties
@@ -147,7 +146,7 @@ class GlyphActivity : AppCompatActivity() {
         println("ON REQUEST PERMISSIONS RESULT")
         thread {
             val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-            println("File absolute path: " + dir?.absolutePath ?: "error")
+            println("File absolute path: " + (dir?.absolutePath ?: "error"))
             val file = File(dir, "scripts.txt")
             val t = measureTimeMillis {
                 glyph(file)
