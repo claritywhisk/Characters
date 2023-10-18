@@ -32,7 +32,7 @@ private const val expected = 199
 class GlyphActivity : AppCompatActivity() {
     var testValues = intArrayOf(0x11265, 0x16B5A, 0x16ACA, 0x10EAA)
     private fun glyph(file: File){
-        val fast = true //Turn on to skip the Unknown script (87% of codepoints, < 1/6 of glyphs)
+        val fast = false //Turn on to skip the Unknown script (87% of codepoints, < 1/6 of glyphs)
         var uSize = 0
         var strings = false
         val list = ArrayList<UnicodeScript>()
@@ -103,7 +103,8 @@ class GlyphActivity : AppCompatActivity() {
             file.writeText(json)
         }
         println("wrote to file in ${"%.3f".format(t2.toDouble() / 1000)} s")
-        println("look for${file.absolutePath}")
+        println("*breathe* and look for ${file.absolutePath}")
+        println("")
         println("Unicode codepoints examined: $uSize")
         println("Glyphs found: ${list.fold(0){ sum, script -> sum + script.size}}")
         println("Scripts: ${list.size}")
