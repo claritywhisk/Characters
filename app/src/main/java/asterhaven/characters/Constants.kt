@@ -44,6 +44,7 @@ const val ENLARGE_FACTOR = 2.2f
 const val SHRINK_FACTOR = .8f
 
 const val CATALOG_COLUMN_STARTING_WIDTH_PX = 90
+const val CATALOG_SECTIONS_RV_SCROLL_DAMP_MS = 150
 
 fun logToTextView(line : String, view : View){
     (view.context as MainActivity).logToTextView(" $line")

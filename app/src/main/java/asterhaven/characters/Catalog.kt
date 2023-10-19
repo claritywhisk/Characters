@@ -9,6 +9,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
+import android.widget.Toast.LENGTH_LONG
+import android.widget.Toast.LENGTH_SHORT
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
@@ -47,16 +50,19 @@ object Catalog {
                 layoutManager = layMan
                 adapter = ada
                 addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    var loading = false
+                    val runner = Runnable { loading = false }
                     override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
                         super.onScrolled(rv, dx, dy)
-                        if (layMan.findLastVisibleItemPosition() >= ada.itemCount - 1) {
-                            ada.loadNextSection()
+                        if(!loading && layMan.findLastVisibleItemPosition() == ada.itemCount - 1) {
+                            removeCallbacks(runner)
+                            loading = true
+                            ada.loadSection()
+                            postDelayed(runner, CATALOG_SECTIONS_RV_SCROLL_DAMP_MS.toLong())
                         }
                     }
                 })
-                //Try to provide enough to fill the screen initially
-                ada.loadNextSection()
-                ada.loadNextSection()
+                ada.loadSection() //todo initial fill
             }
         }
     }
@@ -106,10 +112,11 @@ object Catalog {
                 val script = Universe.allScripts[position - 1]
                 holder.title.text = script.name
                 holder.rv.adapter = CharacterGridAdapter(script)
+                Toast.makeText(context, "Bind section (script) $normalScriptsLoaded", LENGTH_SHORT).show()
             }
         }
         override fun getItemCount(): Int = 1 + normalScriptsLoaded //one section for Recent
-        fun loadNextSection(){
+        fun loadSection(){
             if(normalScriptsLoaded < Universe.allScripts.size){
                 normalScriptsLoaded++
                 notifyItemInserted(normalScriptsLoaded)
