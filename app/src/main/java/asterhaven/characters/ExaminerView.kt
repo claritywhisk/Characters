@@ -20,8 +20,11 @@ class ExaminerView(context: Context, attrs: AttributeSet?) : androidx.appcompat.
                 typeface = FontFallback.Font.values()[value.fontIndex].getTypeface()
             }
             text = value?.asString ?: ""
+            desc.isSelected = false
+            desc.postDelayed({
+                desc.isSelected = true
+            }, EXAMINER_MARQUEE_DELAY.toLong())
             desc.text = value?.description() ?: ""
-            desc.isSelected = true
             hex.text = value?.hex() ?: ""
             field = value
         }

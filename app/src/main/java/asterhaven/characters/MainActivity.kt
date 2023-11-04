@@ -5,24 +5,15 @@ import android.animation.AnimatorListenerAdapter
 import android.content.res.Configuration
 import android.media.MediaPlayer
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.transition.TransitionManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.allViews
-import androidx.core.view.children
-import androidx.core.view.updateLayoutParams
 import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.databinding.ActivityMainBinding
 import asterhaven.characters.databinding.InventoryBinding
-import asterhaven.characters.databinding.PanelBinding
 import asterhaven.characters.unicodescript.UnicodeScript
 import kotlinx.coroutines.*
 import java.io.File
@@ -60,6 +51,7 @@ class MainActivity : AppCompatActivity() {
                 Progress.save(progress)
             }
             CoroutineScope(Dispatchers.Main).launch {
+                timeTV("prepChars", binding.worldView) { UnicodeCharacter.all.size }
                 binding.mainLogTextView.typeface = FontFallback.Font.GNU_UNIFONT.getTypeface() //todo dynamic
                 binding.worldView.doInit(progress)
                 /*CoroutineScope(Dispatchers.Default).launch {
@@ -129,7 +121,7 @@ class MainActivity : AppCompatActivity() {
         inventory.scriptName.text = script.name
         progressBar = inventory.scriptProgress.also {
             it.max = script.size
-            it.setProgress(progress.seen.countInScript[Universe.indexOfScript[script]!!], true)
+            it.setProgress(progress.countInScript[Universe.indexOfScript[script]!!], true)
         }
         crossfade(inventory.invTable, inventory.invMatched, false){}
     }
@@ -144,13 +136,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun pictureButtonClick(v : View){
-        for(i in Universe.allScripts.indices){
-            val s = Universe.allScripts[i]
-            logToTextView("${s.name} " +
-                    "${progress.seen.countInScript[i]}/" +
-                    "${progress.spawnedOrSeen.countInScript[i]}//" +
-                    "${s.size} ${progress.seenScript[i]}")
-        }
+
     }
 
     fun sleepButtonClick(z : View){

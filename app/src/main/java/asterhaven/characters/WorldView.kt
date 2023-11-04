@@ -53,7 +53,6 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
             if(BuildConfig.DEBUG) logToTextView("debug: behind by $t ms", this@WorldView)
         }
         val progress = (context as MainActivity).progress
-        computedMap.forEach { r -> r.forEach { t -> t.character?.let { progress.mayUnspawn(it) } } }
         //shift map. use temp in (theoretical) case it's still computing its edges
         val range = 0 until EXTENDED_MAP_SIZE
         val mapTemp = Array(EXTENDED_MAP_SIZE) { i ->
@@ -62,7 +61,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
                 val y = j + dy
                 when (x in range && y in range) {
                     true -> computedMap[x][y].also { it ->
-                        it.character?.let { progress.didNotUnspawn(it) }
+                        it.character?.let { progress.doNotUnspawn(it) }
                     }
                     false -> {
                         movement.requisition(i, j) //Movement will set this coordinate
@@ -71,6 +70,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
                 }
             }
         }
+        progress.unspawnRemaining()
         //with the new map, work can begin on the new coordinates
         computedMap = mapTemp
         movement.startUpdate()

@@ -99,7 +99,7 @@ class SleepView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
         loc[si] = 0.0
     }
 
-    private fun character() = progress.spawnRandUnseenInScript(randScriptI())
+    private fun character() = progress.spawnRandUnspawnedInScript(randScriptI()) //TODO verify behavior etc. this file
 
     private fun randScriptI() : Int {
         var r4Script = Random.nextDouble() * sigmadims

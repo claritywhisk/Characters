@@ -1,39 +1,43 @@
 package asterhaven.characters
 
+import asterhaven.characters.Universe.allScripts
 import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.unicodescript.UnicodeScript
-import kotlin.random.Random
 
-data class UnicodeCharacter private constructor(val script : UnicodeScript, val indexInScript : Int){
-    val asString: String = script.charAt(indexInScript)
-    companion object Factory {
-        fun create(scriptI : Int) : UnicodeCharacter {
-            val script = Universe.allScripts[scriptI]
-            val randCharI = Random.nextInt(script.size)
-            return UnicodeCharacter(script, randCharI)
-        }
-        fun create(scriptI : Int, charI : Int) = UnicodeCharacter(Universe.allScripts[scriptI], charI)
-        fun create(asString : String) : UnicodeCharacter {
-            fun script(str : String) = Character.UnicodeScript.of(str.codePointAt(0))
-            val s = script(asString)
-            val scriptI = Universe.allScripts.indices.first {
-                script(Universe.allScripts[it].charAt(0)) == s
+data class UnicodeCharacter private constructor(
+    val script : UnicodeScript,
+    val asString: String,
+    val i : Int //index in all
+){
+    companion object {
+        val n by lazy { allScripts.sumOf { it.size } }
+        val scriptStartI by lazy {
+            var i = 0
+            IntArray(allScripts.size){ si ->
+                i.also { i += allScripts[si].size }
             }
-            for(charI in 0 until Universe.allScripts[scriptI].size) {
-                val c = Universe.allScripts[scriptI].charAt(charI)
-                if(c != asString) continue
-                return create(scriptI, charI)
-            }
-            throw squawk(asString)
         }
-        private fun squawk(asString : String) = RuntimeException("Bad character: $asString ${
-            asString.codePointAt(0).toString(16).uppercase()
-        }")
+        //all 100000+ character-describing objects
+        val all by lazy {
+            var si = 0
+            var charIter = allScripts[si].charIterator()
+            Array(n){ ci ->
+                if(si + 1 < allScripts.size && scriptStartI[si + 1] == ci){
+                    si++
+                    charIter = allScripts[si].charIterator()
+                }
+                if(BuildConfig.DEBUG) check(charIter.hasNext())
+                UnicodeCharacter(allScripts[si], charIter.next(), ci)
+            }
+        }
+        fun getFor(script: UnicodeScript, pos : Int) = all[scriptStartI[Universe.indexOfScript[script]!!] + pos]
     }
+
     init {
-        if(script.charAt(indexInScript) != asString) check(false)
-        if(FontFallback.Font.values().none { FontFallback.hasGlyph(it, asString)})
-            throw squawk(asString)
+        if(BuildConfig.DEBUG && FontFallback.Font.values().none { FontFallback.hasGlyph(it, asString)})
+            throw RuntimeException("Bad character: $asString ${
+                asString.codePointAt(0).toString(16).uppercase()
+            }")
     }
 
     fun description() = Character.getName(asString.codePointAt(0)) //todo test on all and 2xCP emojis

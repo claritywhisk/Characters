@@ -6,7 +6,7 @@ import kotlin.system.measureTimeMillis
 const val MUTE = true
 
 const val DEBUG_SMALL_SCRIPTS = false
-const val DEBUG_MAX_SCRIPT_SIZE = 30
+const val DEBUG_MAX_SCRIPT_SIZE = 40
 const val DEBUG_GLYPH_BOUNDS = false
 const val DEBUG_RESET_PROGRESS = true
 val CHAOS : Double = if(DEBUG_SMALL_SCRIPTS) .1 else .0003 //upper bound of test random
@@ -45,6 +45,8 @@ const val SHRINK_FACTOR = .8f
 
 const val CATALOG_COLUMN_STARTING_WIDTH_PX = 90
 const val CATALOG_SECTIONS_RV_SCROLL_DAMP_MS = 150
+
+const val EXAMINER_MARQUEE_DELAY = 1500
 
 fun logToTextView(line : String, view : View){
     (view.context as MainActivity).logToTextView(" $line")

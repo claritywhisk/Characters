@@ -39,7 +39,7 @@ class Movement() {
     private fun computeCharacter(i: Int, j: Int): UnicodeCharacter? {
         val dims : DoubleArray = tileOdds(i, j)
         var roll = Random.nextDouble()
-        for(si in 0 until SZ) {
+        for(si in SZ - 1 downTo 0) { // todo testing this backwards
             if(roll < dims[si]) return progress.spawnRandUnspawnedInScript(si)
             else roll -= dims[si]
         }
@@ -79,7 +79,7 @@ class Movement() {
             wv.outerComputedMapCoords().forEach {
                 wv.computedMap[it.first][it.second].let { tile ->
                     if(tile is DeferredTile) tile.cancel = true
-                    tile.character?.let { c -> progress.mayUnspawn(c) }
+                    //tile.character?.let { c -> progress.mayUnspawn(c) } Todo: this method has broken with recent changes
                 }
                 movement.requisition(it.first, it.second)
             }

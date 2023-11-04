@@ -17,17 +17,20 @@ data class UnicodeScript(val name : String, private val ranges : String){
         s
     }
 
-    fun charAt(pos : Int) : String {
-        if(pos < 0 || pos >= size) {
-            throw IllegalStateException("pos $pos for $name with $size chars")
+    fun charIterator() = object : Iterator<String> {
+        val rangeIterator = ranges.codePoints().iterator()
+        var first = 0
+        var last = -1 //todo confirm name "last" (iirc about ranges)
+        var i = 0
+        override fun hasNext() = first + i <= last || rangeIterator.hasNext()
+        override fun next(): String {
+            if(first + i > last){
+                first = rangeIterator.nextInt()
+                last = rangeIterator.nextInt()
+                i = 0
+            }
+            return String(intArrayOf(first + i++), 0, 1)
         }
-        var remaining = pos + 1
-        rangeIterate { first, count ->
-            if(remaining > count) remaining -= count
-            else return String(intArrayOf(first + remaining - 1), 0, 1)
-        }
-        throw IllegalStateException("UnicodeScript.charAt error")
-        //return ranges[0].toString()
     }
 
     private inline fun rangeIterate(f : (Int, Int) -> Unit) {
@@ -44,8 +47,9 @@ data class UnicodeScript(val name : String, private val ranges : String){
     }
 
     override fun toString(): String {
-        var str = "$name ($size characters)\n"
-        for(i in 0 until size) str += charAt(i)
-        return str + "\n"
+        var str = StringBuilder("$name ($size characters)\n")
+        for(c in charIterator()) str.append(c)
+        str.append("\n")
+        return str.toString()
     }
 }

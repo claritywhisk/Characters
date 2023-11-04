@@ -168,13 +168,13 @@ object Catalog {
         override fun onBindViewHolder(holder: CharacterGridHolder, position: Int) {
             holder.size()
             holder.character(
-                if(script == null) progress.recentQueue[position]
-                else if(progress.seen(script, position)) UnicodeCharacter.create(scriptI, position)
+                if(script == null) progress.recent(position)
+                else if(progress.seen(script, position)) UnicodeCharacter.getFor(script, position)
                 else null
             )
         }
         override fun getItemCount(): Int {
-            return script?.size ?: progress.recentQueue.size
+            return script?.size ?: progress.numRecent()
         }
     }
 }
