@@ -17,19 +17,19 @@ data class UnicodeScript(val name : String, private val ranges : String){
         s
     }
 
-    fun charIterator() = object : Iterator<String> {
+    fun codepointIterator() = object : Iterator<Int> {
         val rangeIterator = ranges.codePoints().iterator()
         var first = 0
         var last = -1 //todo confirm name "last" (iirc about ranges)
         var i = 0
         override fun hasNext() = first + i <= last || rangeIterator.hasNext()
-        override fun next(): String {
+        override fun next(): Int {
             if(first + i > last){
                 first = rangeIterator.nextInt()
                 last = rangeIterator.nextInt()
                 i = 0
             }
-            return String(intArrayOf(first + i++), 0, 1)
+            return first + i++
         }
     }
 
@@ -48,7 +48,7 @@ data class UnicodeScript(val name : String, private val ranges : String){
 
     override fun toString(): String {
         var str = StringBuilder("$name ($size characters)\n")
-        for(c in charIterator()) str.append(c)
+        for(c in codepointIterator()) str.append(c)
         str.append("\n")
         return str.toString()
     }

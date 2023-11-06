@@ -17,28 +17,39 @@ data class UnicodeCharacter private constructor(
                 i.also { i += allScripts[si].size }
             }
         }
-        //all 100000+ character-describing objects
-        val all by lazy {
-            var si = 0
-            var charIter = allScripts[si].charIterator()
-            Array(n){ ci ->
-                if(si + 1 < allScripts.size && scriptStartI[si + 1] == ci){
-                    si++
-                    charIter = allScripts[si].charIterator()
+        //all 100000+ character addresses
+        private val allCodepoints by lazy {
+            Array(allScripts.size){si ->
+                val iterator = allScripts[si].codepointIterator()
+                IntArray(allScripts[si].size){
+                    if(BuildConfig.DEBUG) check(iterator.hasNext())
+                    iterator.next()
                 }
-                if(BuildConfig.DEBUG) check(charIter.hasNext())
-                UnicodeCharacter(allScripts[si], charIter.next(), ci)
             }
         }
-        fun getFor(script: UnicodeScript, pos : Int) = all[scriptStartI[Universe.indexOfScript[script]!!] + pos]
+        private val all by lazy {
+            Array(allScripts.size) { si ->
+                Array<UnicodeCharacter?>(allScripts[si].size) {
+                    null
+                }
+            }
+        }
+        fun get(script : UnicodeScript, i : Int) : UnicodeCharacter {
+            val si = Universe.indexOfScript[script]!!
+            if(all[si][i] == null){
+                val asString = String(intArrayOf(allCodepoints[si][i]), 0, 1) //todo 2 codepoint emoji?
+                all[si][i] = UnicodeCharacter(allScripts[si], asString, i)
+            }
+            return all[si][i]!!
+        }
     }
 
-    init {
+    /*init { Todo: time consuming check has apparently passed on my phone
         if(BuildConfig.DEBUG && FontFallback.Font.values().none { FontFallback.hasGlyph(it, asString)})
             throw RuntimeException("Bad character: $asString ${
                 asString.codePointAt(0).toString(16).uppercase()
             }")
-    }
+    }*/
 
     fun description() = Character.getName(asString.codePointAt(0)) //todo test on all and 2xCP emojis
 

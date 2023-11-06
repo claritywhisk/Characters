@@ -169,7 +169,7 @@ object Catalog {
             holder.size()
             holder.character(
                 if(script == null) progress.recent(position)
-                else if(progress.seen(script, position)) UnicodeCharacter.getFor(script, position)
+                else if(progress.seen(script, position)) UnicodeCharacter.get(script, position)
                 else null
             )
         }

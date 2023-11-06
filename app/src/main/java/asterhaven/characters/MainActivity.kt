@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
                 Progress.save(progress)
             }
             CoroutineScope(Dispatchers.Main).launch {
-                timeTV("prepChars", binding.worldView) { UnicodeCharacter.all.size }
+                timeTV("prepChars", binding.worldView) { UnicodeCharacter.get(Universe.allScripts[0],0) }
                 binding.mainLogTextView.typeface = FontFallback.Font.GNU_UNIFONT.getTypeface() //todo dynamic
                 binding.worldView.doInit(progress)
                 /*CoroutineScope(Dispatchers.Default).launch {

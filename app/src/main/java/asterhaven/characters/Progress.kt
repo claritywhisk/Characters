@@ -2,7 +2,7 @@ package asterhaven.characters
 
 import android.view.Gravity
 import android.widget.Toast
-import androidx.collection.CircularIntArray
+import androidx.collection.CircularArray
 import asterhaven.characters.Universe.allScripts
 import asterhaven.characters.unicodescript.UnicodeScript
 import kotlinx.coroutines.*
@@ -22,17 +22,16 @@ class Progress(fresh : Boolean) {
     val countInScript = IntArray(allScripts.size)
 
     private val allCharsInScript : Array<SeenUnseenInScript> = Array(allScripts.size) { si ->
-        SeenUnseenInScript(si)
+        SeenUnseenInScript(allScripts[si])
     }
-    class SeenUnseenInScript(private val si : Int){
-        //array of [seen... undefined (size of number currently spawned) ...unseen]
-        private val list = ArrayList<Int>(allScripts[si].size)
+    class SeenUnseenInScript(private val script : UnicodeScript){
+        //array of indices in script [seen... undefined (size of number currently spawned) ...unseen]
+        private val list = ArrayList<Int>(script.size)
         private var iFirstNewCatalog = 0
         private var iFirstAfterSeen = 0 //index of middle, if any
         private var iUnseen = 0
         fun initAllUnseen(){
-            val firstCharI = UnicodeCharacter.scriptStartI[si]
-            for(i in firstCharI until firstCharI + allScripts[si].size) list.add(i)
+            for(ci in 0 until script.size) list.add(ci)
         }
         fun see(ci : Int) {
             list[iFirstAfterSeen] = ci
@@ -43,7 +42,7 @@ class Progress(fresh : Boolean) {
             if(iUnseen == list.size) return null
             val i = iUnseen + Random.nextInt(list.size - iUnseen)
             list[iUnseen] = list[i].also { list[i] = list[iUnseen] }
-            return UnicodeCharacter.all[list[iUnseen++]]
+            return UnicodeCharacter.get(script, list[iUnseen++])
         }
         fun chooseKUniqueForCatalogPreview(k : Int) : ArrayList<UnicodeCharacter> {
             val ret = ArrayList<UnicodeCharacter>()
@@ -52,7 +51,7 @@ class Progress(fresh : Boolean) {
             fun fisherYates(endPoint : Int){
                 val i = iFirstNewCatalog + Random.nextInt(endPoint - iFirstNewCatalog)
                 list[iFirstNewCatalog] = list[i].also { list[i] = list[iFirstNewCatalog] }
-                ret.add(UnicodeCharacter.all[list[iFirstNewCatalog]])
+                ret.add(UnicodeCharacter.get(script, list[iFirstNewCatalog]))
                 iFirstNewCatalog++
             }
             val f = iFirstNewCatalog
@@ -68,7 +67,7 @@ class Progress(fresh : Boolean) {
     }
 
     //history of recently seen in world view and sleep
-    private val history = CircularIntArray(PROGRESS_RECENT_SIZE)
+    private val history = CircularArray<UnicodeCharacter>(PROGRESS_RECENT_SIZE) //todo
     //indices of characters hiding around edges of world view
     private val spawned = HashSet<Int>()
     private val keepSpawned = HashSet<Int>()
@@ -113,7 +112,7 @@ class Progress(fresh : Boolean) {
     }
     fun seen(s : UnicodeScript, i : Int) = seenChar[UnicodeCharacter.scriptStartI[Universe.indexOfScript[s]!!] + i] > 0
 
-    fun recent(i : Int) = UnicodeCharacter.all[history.get(i)]
+    fun recent(i : Int) = history.get(i)
     fun numRecent() = history.size()
 
     companion object {
