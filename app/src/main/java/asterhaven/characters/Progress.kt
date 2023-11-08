@@ -10,12 +10,13 @@ import java.util.*
 import kotlin.random.Random
 import java.io.File
 import java.lang.Integer.min
+import kotlin.collections.ArrayList
 import kotlin.reflect.KProperty
 
 //Todo versioning smooth transition when game updates
 class Progress(fresh : Boolean) {
     //times seen before in world view
-    val seenChar = IntArray(UnicodeCharacter.n)
+    val seenChar = IntArray(UnicodeCharacter.n) //TODO TODO [script][]
     //flags for script completion (seen once)
     val seenScript = BooleanArray(allScripts.size)
     //counts for script completion (seen once)
@@ -69,18 +70,20 @@ class Progress(fresh : Boolean) {
     //history of recently seen in world view and sleep
     private val history = CircularArray<UnicodeCharacter>(PROGRESS_RECENT_SIZE) //todo
     //indices of characters hiding around edges of world view
-    private val spawned = HashSet<Int>()
-    private val keepSpawned = HashSet<Int>()
+    private val spawned = HashSet<UnicodeCharacter>()
+    private val keepSpawned = HashSet<UnicodeCharacter>()
 
     init {
         if(fresh) allCharsInScript.forEach { it.initAllUnseen() }
     }
 
     @Synchronized fun see(c: UnicodeCharacter, ma: MainActivity) {
-        if (spawned.contains(c.i)) {
+        if (spawned.contains(c)) {
             seenChar[c.i]++
             allCharsInScript[c.scriptIndex()].see(c.i)
-            spawned.remove(c.i)
+            spawned.remove(c)
+            if(history.size() == PROGRESS_RECENT_SIZE) history.removeFromEnd(1)
+            history.addFirst(c)
             if(seenChar[c.i] == 1) {
                 val scriptI = c.scriptIndex()
                 val x = ++countInScript[scriptI]
@@ -102,18 +105,27 @@ class Progress(fresh : Boolean) {
         }
     }
 
-    @Synchronized fun spawnRandUnspawnedInScript(si: Int): UnicodeCharacter? {
-        return allCharsInScript[si].spawnRandomUnseen()
+    @Synchronized fun spawnRandUnspawnedInScript(si: Int) = allCharsInScript[si].spawnRandomUnseen().also {
+        if(it != null) spawned.add(it)
     }
-    fun doNotUnspawn(c : UnicodeCharacter) = keepSpawned.add(c.i)
+    fun doNotUnspawn(c : UnicodeCharacter) = keepSpawned.add(c)
     fun unspawnRemaining(){
         spawned.removeAll { it !in keepSpawned }
         keepSpawned.clear()
     }
     fun seen(s : UnicodeScript, i : Int) = seenChar[UnicodeCharacter.scriptStartI[Universe.indexOfScript[s]!!] + i] > 0
 
-    fun recent(i : Int) = history.get(i)
+    fun recent(i : Int) : UnicodeCharacter = history.get(i)
+    fun kRecent(k : Int) = history.size().coerceAtMost(k).let {
+        ArrayList<UnicodeCharacter>(it).apply {
+            for (i in 0 until it) add(recent(i))
+        }
+    }
     fun numRecent() = history.size()
+
+    fun kUniqueInScriptForCatalogPreview(script: UnicodeScript, k: Int) =
+        allCharsInScript[Universe.indexOfScript[script]!!].chooseKUniqueForCatalogPreview(k)
+
 
     companion object {
         private lateinit var saveFile : File

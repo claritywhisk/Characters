@@ -8,9 +8,9 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
-import android.widget.Toast.LENGTH_LONG
 import android.widget.Toast.LENGTH_SHORT
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
 import androidx.core.content.res.ResourcesCompat
@@ -57,12 +57,12 @@ object Catalog {
                         if(!loading && layMan.findLastVisibleItemPosition() == ada.itemCount - 1) {
                             removeCallbacks(runner)
                             loading = true
-                            ada.loadSection()
+                            post{ ada.loadSection() }
                             postDelayed(runner, CATALOG_SECTIONS_RV_SCROLL_DAMP_MS.toLong())
                         }
                     }
                 })
-                ada.loadSection() //todo initial fill
+                post { ada.loadSection() } //todo initial fill
             }
         }
     }
@@ -101,26 +101,29 @@ object Catalog {
         override fun onBindViewHolder(holder: SectionViewHolder, position: Int) {
             holder.rv.layoutManager = GridLayoutManager(context, 1)
             holder.rv.post {
-                val columns = holder.rv.measuredWidth / itemSize
-                (holder.rv.layoutManager as GridLayoutManager).spanCount = columns
+                val columnsAvail = (holder.rv.parent as FrameLayout).measuredWidth / itemSize
+                //currently expect to always preview when showing multiple sections todo confirm
+                val columns = (holder.rv.adapter as CharacterGridAdapter).preview(columnsAvail)
+                (holder.rv.layoutManager as GridLayoutManager).spanCount = columns.coerceAtLeast(1)
             }
             if(position == 0) {
                 holder.title.text = strRecent
-                holder.rv.adapter = CharacterGridAdapter(null)
+                holder.rv.adapter = CharacterGridAdapter(null, true)
             }
             else {
                 val script = Universe.allScripts[position - 1]
                 holder.title.text = script.name
-                holder.rv.adapter = CharacterGridAdapter(script)
+                holder.rv.adapter = CharacterGridAdapter(script, true)
                 Toast.makeText(context, "Bind section (script) $normalScriptsLoaded", LENGTH_SHORT).show()
             }
         }
         override fun getItemCount(): Int = 1 + normalScriptsLoaded //one section for Recent
-        fun loadSection(){
+        fun loadSection() : Runnable {
             if(normalScriptsLoaded < Universe.allScripts.size){
                 normalScriptsLoaded++
-                notifyItemInserted(normalScriptsLoaded)
+                return Runnable { notifyItemInserted(normalScriptsLoaded) }
             }
+            return Runnable {}
         }
     }
     class CharacterGridHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -155,11 +158,20 @@ object Catalog {
             }
         }
     }
-    class CharacterGridAdapter(private val script: UnicodeScript?) : RecyclerView.Adapter<CharacterGridHolder>() {
+    class CharacterGridAdapter(
+        private val script: UnicodeScript?,
+        private val isPreview : Boolean
+    ) : RecyclerView.Adapter<CharacterGridHolder>() {
+        private var previewChars : ArrayList<UnicodeCharacter>? = null
         companion object {
             val progress by Progress
         }
-        private val scriptI by lazy { Universe.indexOfScript[script]!! }
+        fun preview(rowSize : Int) : Int {
+            previewChars = if(script == null) progress.kRecent(rowSize)
+            else progress.kUniqueInScriptForCatalogPreview(script, rowSize)
+            notifyItemRangeInserted(0, previewChars!!.size)
+            return previewChars!!.size
+        }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterGridHolder {
             val lI = LayoutInflater.from(parent.context)
             val v = lI.inflate(R.layout.catalog_character_tile, parent, false)
@@ -168,13 +180,14 @@ object Catalog {
         override fun onBindViewHolder(holder: CharacterGridHolder, position: Int) {
             holder.size()
             holder.character(
-                if(script == null) progress.recent(position)
+                if(isPreview) previewChars!![position]
+                else if(script == null) progress.recent(position)
                 else if(progress.seen(script, position)) UnicodeCharacter.get(script, position)
                 else null
             )
         }
         override fun getItemCount(): Int {
-            return script?.size ?: progress.numRecent()
+            return if(isPreview) previewChars?.size ?: 0 else script?.size ?: progress.numRecent()
         }
     }
 }
