@@ -36,4 +36,16 @@
 
     </androidx.recyclerview.widget.RecyclerView>
 
+    <include
+        android:id="@+id/fullScript"
+        layout="@layout/catalog_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/cat_panel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+    </include>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

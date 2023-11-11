@@ -16,11 +16,13 @@ import kotlin.reflect.KProperty
 //Todo versioning smooth transition when game updates
 class Progress(fresh : Boolean) {
     //times seen before in world view
-    val seenChar = IntArray(UnicodeCharacter.n) //TODO TODO [script][]
+    val seenScriptChar = Array(allScripts.size){ si ->
+        IntArray(allScripts[si].size)
+    }
     //flags for script completion (seen once)
     val seenScript = BooleanArray(allScripts.size)
     //counts for script completion (seen once)
-    val countInScript = IntArray(allScripts.size)
+    val countFoundInScript = IntArray(allScripts.size)
 
     private val allCharsInScript : Array<SeenUnseenInScript> = Array(allScripts.size) { si ->
         SeenUnseenInScript(allScripts[si])
@@ -79,26 +81,26 @@ class Progress(fresh : Boolean) {
 
     @Synchronized fun see(c: UnicodeCharacter, ma: MainActivity) {
         if (spawned.contains(c)) {
-            seenChar[c.i]++
-            allCharsInScript[c.scriptIndex()].see(c.i)
+            val si = c.scriptIndex()
+            seenScriptChar[si][c.i]++
+            allCharsInScript[si].see(c.i)
             spawned.remove(c)
             if(history.size() == PROGRESS_RECENT_SIZE) history.removeFromEnd(1)
             history.addFirst(c)
-            if(seenChar[c.i] == 1) {
-                val scriptI = c.scriptIndex()
-                val x = ++countInScript[scriptI]
+            if(seenScriptChar[si][c.i] == 1) {
+                val x = ++countFoundInScript[si]
                 val sought = c.script == ma.matched4
                 if (sought) ma.progressBar?.setProgress(x, true)
-                if (x == allScripts[scriptI].size) {
-                    seenScript[scriptI] = true
+                if (x == allScripts[si].size) {
+                    seenScript[si] = true
                     val toast = Toast.makeText(
                         ma,
-                        "Completed ${allScripts[scriptI].name}!",
+                        "Completed ${allScripts[si].name}!",//todo string resource
                         Toast.LENGTH_LONG
                     )
                     toast.setGravity(Gravity.TOP, 0, 0)
                     toast.show()
-                    ma.logToTextView("Completed ${allScripts[scriptI].name}!")
+                    ma.logToTextView("Completed ${allScripts[si].name}!")
                     if (sought) ma.finishedWithScript()
                 }
             }
@@ -113,7 +115,7 @@ class Progress(fresh : Boolean) {
         spawned.removeAll { it !in keepSpawned }
         keepSpawned.clear()
     }
-    fun seen(s : UnicodeScript, i : Int) = seenChar[UnicodeCharacter.scriptStartI[Universe.indexOfScript[s]!!] + i] > 0
+    fun seen(s : UnicodeScript, i : Int) = seenScriptChar[Universe.indexOfScript[s]!!][i] > 0
 
     fun recent(i : Int) : UnicodeCharacter = history.get(i)
     fun kRecent(k : Int) = history.size().coerceAtMost(k).let {
@@ -136,34 +138,30 @@ class Progress(fresh : Boolean) {
         operator fun getValue(thisRef: Any?, property: KProperty<*>): Progress {
             if(lazyLoadedFlag) return progress
             progress = runBlocking { progressAsync.await() }
-            if(BuildConfig.DEBUG && thisRef is MainActivity)
-                thisRef.logToTextView("Started with ${progress.seenChar.count{it > 0}} chars")
+            if(BuildConfig.DEBUG && thisRef is MainActivity) {
+                thisRef.logToTextView("Started with ${progress.countFoundInScript.sum()}} chars")
+            }
             lazyLoadedFlag = true
             return progress
         }
         private fun loadAsync(file: File) = CoroutineScope(Dispatchers.IO).async {
             val bytes = file.readBytes()
+            var j = 0
             val p = Progress(false) //todo assure proper init
-            var script = 0
-            var seenScript = true
-            val seenDraft = ArrayList<ArrayList<Int>>()
-            for(i in 0 until p.seenChar.size) {
-                val x = bytes[i].toInt()
-                while(seenDraft.lastIndex < x) seenDraft.add(ArrayList<Int>())
-                seenDraft[x].add(i)
-                when(x) {
-                    0 -> seenScript = false
-                    else -> {
-                        p.seenChar[i] = x.toInt()
-                        p.countInScript[script]++
+            for(si in allScripts.indices) {
+                var seenScript = true
+                for(ci in 0 until allScripts[si].size){
+                    val x = bytes[j++].toInt()
+                    when(x) {
+                        0 -> seenScript = false
+                        else -> {
+                            p.seenScriptChar[si][ci] = x
+                            p.countFoundInScript[si]++
+                        }
                     }
+
                 }
-                val nextScript = script + 1
-                if(nextScript < UnicodeCharacter.scriptStartI.size && UnicodeCharacter.scriptStartI[nextScript] == i + 1) {
-                    if(seenScript) p.seenScript[script] = true
-                    seenScript = true
-                    script = nextScript
-                }
+                p.seenScript[si] = seenScript
             }
             p
         }
@@ -172,8 +170,14 @@ class Progress(fresh : Boolean) {
             if(::saveFile.isInitialized && saveJob?.isCompleted != false){
                 val bytes: ByteArray
                 synchronized(progress) {
-                    bytes = ByteArray(progress.seenChar.size) {
-                            i -> progress.seenChar[i].coerceAtMost(Byte.MAX_VALUE.toInt()).toByte()
+                    var si = 0
+                    var ci = 0
+                    bytes = ByteArray(progress.seenScriptChar.sumOf { it.size }) { _ ->
+                        while(ci == allScripts[si].size){
+                            ci = 0
+                            si++
+                        }
+                        progress.seenScriptChar[si][ci++].coerceAtMost(Byte.MAX_VALUE.toInt()).toByte()
                     }
                 }
                 saveJob = CoroutineScope(Dispatchers.IO).launch { saveFile.writeBytes(bytes) }

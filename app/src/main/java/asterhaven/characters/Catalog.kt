@@ -7,29 +7,37 @@ import android.transition.TransitionManager
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import asterhaven.characters.databinding.ActivityMainBinding
+import asterhaven.characters.databinding.CatalogBinding
 import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.unicodescript.UnicodeScript
 
-object Catalog {
+class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
     private var viewsRemoved : List<View> = listOf()
     private var prevPanelParams : LayoutParams = LayoutParams(0,0)
     private var didFirstAppear = false
     private var itemSize = CATALOG_COLUMN_STARTING_WIDTH_PX
-    fun initIfUninitialized(binding: ActivityMainBinding, activity: MainActivity) {
-        if(didFirstAppear) return
+    private var previewSections : RecyclerView
+    private val seenBackground : Drawable
+    private val unseenBackground : Drawable
+    private val progress by Progress
+    init {
         val cat = activity.layoutInflater.inflate(R.layout.catalog, null)
         viewsRemoved = listOf(cat)
         cat.layoutParams = LayoutParams(0,0)
@@ -41,10 +49,17 @@ object Catalog {
             endToEnd = binding.root.id
             bottomToTop = binding.mainPanel.root.id
         }
-        CharacterGridHolder.getBackgroundDrawables(activity)
-        val mainRV = cat.findViewById<RecyclerView>(R.id.catalogSections )
-        mainRV.post {
-            mainRV.apply {
+        //get background drawables
+        seenBackground = ResourcesCompat.getDrawable(activity.resources, R.drawable.catalog_entry, activity.theme)!!
+        val gd = seenBackground.constantState?.newDrawable(activity.resources)?.mutate() as GradientDrawable?
+        val typedValue = TypedValue()
+        activity.theme.resolveAttribute(R.attr.colorCatalogUnseen, typedValue, true)
+        gd?.setColor(typedValue.data)
+        unseenBackground = gd ?: seenBackground
+        //set up outer recyclerview
+        previewSections = cat.findViewById(R.id.catalogSections )
+        previewSections.post {
+            previewSections.apply {
                 val layMan = LinearLayoutManager(activity)
                 val ada = SectionAdapter(activity)
                 layoutManager = layMan
@@ -66,7 +81,7 @@ object Catalog {
             }
         }
     }
-    fun toggle(binding: ActivityMainBinding){
+    @Synchronized fun toggle(binding: ActivityMainBinding){
         TransitionManager.beginDelayedTransition(binding.root)
         val mp = binding.mainPanel.root
         prevPanelParams = (mp.layoutParams as LayoutParams).also { mp.layoutParams = prevPanelParams }
@@ -80,39 +95,76 @@ object Catalog {
                 endToEnd = binding.root.id
                 bottomToBottom = binding.root.id
             }
-            didFirstAppear = true
         }
         val restoringViews = viewsRemoved
         viewsRemoved = binding.root.children.filter { it != mp }.toList()
         viewsRemoved.forEach { binding.root.removeView(it) }
-        restoringViews.forEach { binding.root.addView(it) }
+        restoringViews.forEach {
+            binding.root.addView(it)
+            if(didFirstAppear && it.id == R.id.catRoot) {
+                if(previewSections.isVisible) (previewSections.adapter as SectionAdapter).updatePreviews()
+                else updateFullScript(it.findViewById<LinearLayout>(R.id.fullScript))
+            }
+        }
+        didFirstAppear = true
     }
-
-    class SectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    @Synchronized fun openFullScript(script : UnicodeScript, cat : CatalogBinding){
+        TransitionManager.beginDelayedTransition(cat.root)
+        previewSections.visibility = GONE
+        cat.root.findViewById<LinearLayout>(R.id.fullScript).let {
+            it.visibility = VISIBLE
+            it.findViewById<TextView>(R.id.sectionTitle).text = script.name
+            it.findViewById<RecyclerView>(R.id.sectionRecyclerView).apply {
+                gridRVInit { columnsAvail ->
+                    columnsAvail.coerceAtMost(script.size)
+                }
+                adapter = CharacterGridAdapter(script, false)
+            }
+        }
+    }
+    @Synchronized fun backToPreviews(cat : CatalogBinding){
+        TransitionManager.beginDelayedTransition(cat.root)
+        cat.root.findViewById<LinearLayout>(R.id.fullScript).visibility = GONE
+        (previewSections.adapter as SectionAdapter).updatePreviews()
+        previewSections.visibility = VISIBLE
+    }
+    private fun updateFullScript(loneSection : LinearLayout){
+        loneSection.findViewById<RecyclerView>(R.id.sectionRecyclerView).adapter.apply {
+            this as CharacterGridAdapter
+            notifyItemRangeChanged(0, itemCount) //todo with third, 'payload' parameter for performance?
+        }
+    }
+    private fun RecyclerView.gridRVInit(columns : (Int) -> Int) {
+        layoutManager = GridLayoutManager(context, 1)
+        post {
+            val columnsAvail = (parent as FrameLayout).measuredWidth / itemSize
+            (layoutManager as GridLayoutManager).spanCount =
+                columns(columnsAvail).coerceAtLeast(1)
+        }
+    }
+    inner class SectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.sectionTitle)
-        val rv: RecyclerView = itemView.findViewById(R.id.recyclerView)
+        val rv: RecyclerView = itemView.findViewById(R.id.sectionRecyclerView)
     }
-    class SectionAdapter(private val context : Context) : RecyclerView.Adapter<SectionViewHolder>() {
+    inner class SectionAdapter(private val context : Context) : RecyclerView.Adapter<SectionViewHolder>() {
         private var normalScriptsLoaded = 0
         private val strRecent = context.resources.getString(R.string.cat_recent_chars_title)
+        private val strUnknownScript = context.resources.getString(R.string.cat_undiscovered_script_title)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = SectionViewHolder(
             LayoutInflater.from(parent.context).inflate(R.layout.catalog_section, parent, false))
         override fun onBindViewHolder(holder: SectionViewHolder, position: Int) {
-            holder.rv.layoutManager = GridLayoutManager(context, 1)
-            holder.rv.post {
-                val columnsAvail = (holder.rv.parent as FrameLayout).measuredWidth / itemSize
-                //currently expect to always preview when showing multiple sections todo confirm
-                val columns = (holder.rv.adapter as CharacterGridAdapter).preview(columnsAvail)
-                (holder.rv.layoutManager as GridLayoutManager).spanCount = columns.coerceAtLeast(1)
+            holder.rv.gridRVInit { columnsAvail ->
+                (holder.rv.adapter as CharacterGridAdapter).preview(columnsAvail)
             }
             if(position == 0) {
                 holder.title.text = strRecent
                 holder.rv.adapter = CharacterGridAdapter(null, true)
             }
             else {
-                val script = Universe.allScripts[position - 1]
-                holder.title.text = script.name
+                val si = position - 1
+                val script = Universe.allScripts[si]
+                holder.title.text = if(progress.countFoundInScript[si] == 0) strUnknownScript else script.name
                 holder.rv.adapter = CharacterGridAdapter(script, true)
                 Toast.makeText(context, "Bind section (script) $normalScriptsLoaded", LENGTH_SHORT).show()
             }
@@ -125,21 +177,12 @@ object Catalog {
             }
             return Runnable {}
         }
-    }
-    class CharacterGridHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tv: CatalogTileView = itemView.findViewById(R.id.catTileTV)
-        companion object {
-            lateinit var seenBackground : Drawable
-            lateinit var unseenBackground : Drawable
-            fun getBackgroundDrawables(activity: MainActivity){
-                seenBackground = ResourcesCompat.getDrawable(activity.resources, R.drawable.catalog_entry, activity.theme)!!
-                val gd = seenBackground.constantState?.newDrawable(activity.resources)?.mutate() as GradientDrawable?
-                val typedValue = TypedValue()
-                activity.theme.resolveAttribute(R.attr.colorCatalogUnseen, typedValue, true)
-                gd?.setColor(typedValue.data)
-                unseenBackground = gd ?: seenBackground
-            }
+        fun updatePreviews(){
+            notifyItemRangeChanged(0, itemCount)
         }
+    }
+    inner class CharacterGridHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val tv: CatalogTileView = itemView.findViewById(R.id.catTileTV)
         fun size() = tv.updateLayoutParams {
             width = itemSize
             height = itemSize
@@ -158,14 +201,11 @@ object Catalog {
             }
         }
     }
-    class CharacterGridAdapter(
+    inner class CharacterGridAdapter(
         private val script: UnicodeScript?,
         private val isPreview : Boolean
     ) : RecyclerView.Adapter<CharacterGridHolder>() {
         private var previewChars : ArrayList<UnicodeCharacter>? = null
-        companion object {
-            val progress by Progress
-        }
         fun preview(rowSize : Int) : Int {
             previewChars = if(script == null) progress.kRecent(rowSize)
             else progress.kUniqueInScriptForCatalogPreview(script, rowSize)

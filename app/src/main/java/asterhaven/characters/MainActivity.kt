@@ -26,6 +26,9 @@ class MainActivity : AppCompatActivity() {
 
     val progress by Progress
     val movement by Movement
+    val catalog by lazy {
+        Catalog(binding, this)
+    }
     var progressBar : ProgressBar? = null
     var matched4 : UnicodeScript? = null
     var inventoryDeleteConfirmation : InventorySlot.ConfirmDeleteStatus? = null
@@ -121,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         inventory.scriptName.text = script.name
         progressBar = inventory.scriptProgress.also {
             it.max = script.size
-            it.setProgress(progress.countInScript[Universe.indexOfScript[script]!!], true)
+            it.setProgress(progress.countFoundInScript[Universe.indexOfScript[script]!!], true)
         }
         crossfade(inventory.invTable, inventory.invMatched, false){}
     }
@@ -156,8 +159,7 @@ class MainActivity : AppCompatActivity() {
 
     fun catalogButtonClick(v : View){
         //todo if sleep, cancel it
-        Catalog.initIfUninitialized(binding, this)
-        Catalog.toggle(binding)
+        catalog.toggle(binding)
     }
     fun settingsButtonClick(v : View){
         Progress.clearProgress()

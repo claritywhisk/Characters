@@ -7,17 +7,10 @@ import asterhaven.characters.unicodescript.UnicodeScript
 data class UnicodeCharacter private constructor(
     val script : UnicodeScript,
     val asString: String,
-    val i : Int //index in all
+    val i : Int //index in script
 ){
     companion object {
-        val n by lazy { allScripts.sumOf { it.size } }
-        val scriptStartI by lazy {
-            var i = 0
-            IntArray(allScripts.size){ si ->
-                i.also { i += allScripts[si].size }
-            }
-        }
-        //all 100000+ character addresses
+        //all 100000+ character addresses (codepoints)
         private val allCodepoints by lazy {
             Array(allScripts.size){si ->
                 val iterator = allScripts[si].codepointIterator()
