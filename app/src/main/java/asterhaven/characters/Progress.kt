@@ -139,7 +139,7 @@ class Progress(fresh : Boolean) {
             if(lazyLoadedFlag) return progress
             progress = runBlocking { progressAsync.await() }
             if(BuildConfig.DEBUG && thisRef is MainActivity) {
-                thisRef.logToTextView("Started with ${progress.countFoundInScript.sum()}} chars")
+                thisRef.logToTextView("Started with ${progress.countFoundInScript.sum()} chars")
             }
             lazyLoadedFlag = true
             return progress

@@ -15,6 +15,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
@@ -33,12 +34,13 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
     private var prevPanelParams : LayoutParams = LayoutParams(0,0)
     private var didFirstAppear = false
     private var itemSize = CATALOG_COLUMN_STARTING_WIDTH_PX
-    private var previewSections : RecyclerView
+    private val cat : ViewGroup
+    private val previewSections : RecyclerView
     private val seenBackground : Drawable
     private val unseenBackground : Drawable
     private val progress by Progress
     init {
-        val cat = activity.layoutInflater.inflate(R.layout.catalog, null)
+        cat = activity.layoutInflater.inflate(R.layout.catalog, null) as ConstraintLayout
         viewsRemoved = listOf(cat)
         cat.layoutParams = LayoutParams(0,0)
         cat.updateLayoutParams<LayoutParams> {
@@ -77,7 +79,15 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
                         }
                     }
                 })
-                post { ada.loadSection() } //todo initial fill
+                fun fillItems() : Any = post {
+                    if (ada.loadSection()) {
+                        val contentsHeight = (0 until previewSections.childCount).sumOf {
+                            previewSections.getChildAt(it)?.height ?: 0
+                        }
+                        if (contentsHeight < previewSections.height) fillItems()
+                    }
+                }
+                fillItems()
             }
         }
     }
@@ -108,11 +118,10 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
         }
         didFirstAppear = true
     }
-    @Synchronized fun openFullScript(script : UnicodeScript, cat : CatalogBinding){
-        TransitionManager.beginDelayedTransition(cat.root)
+    @Synchronized fun openFullScript(script : UnicodeScript){
+        TransitionManager.beginDelayedTransition(cat)
         previewSections.visibility = GONE
-        cat.root.findViewById<LinearLayout>(R.id.fullScript).let {
-            it.visibility = VISIBLE
+        cat.findViewById<LinearLayout>(R.id.fullScript).let {
             it.findViewById<TextView>(R.id.sectionTitle).text = script.name
             it.findViewById<RecyclerView>(R.id.sectionRecyclerView).apply {
                 gridRVInit { columnsAvail ->
@@ -120,11 +129,12 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
                 }
                 adapter = CharacterGridAdapter(script, false)
             }
+            it.visibility = VISIBLE
         }
     }
-    @Synchronized fun backToPreviews(cat : CatalogBinding){
-        TransitionManager.beginDelayedTransition(cat.root)
-        cat.root.findViewById<LinearLayout>(R.id.fullScript).visibility = GONE
+    @Synchronized fun backToPreviews(){
+        TransitionManager.beginDelayedTransition(cat)
+        cat.findViewById<LinearLayout>(R.id.fullScript).visibility = GONE
         (previewSections.adapter as SectionAdapter).updatePreviews()
         previewSections.visibility = VISIBLE
     }
@@ -160,22 +170,31 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
             if(position == 0) {
                 holder.title.text = strRecent
                 holder.rv.adapter = CharacterGridAdapter(null, true)
+                //todo decide recent behavior and if "full" recent on click
             }
             else {
                 val si = position - 1
                 val script = Universe.allScripts[si]
-                holder.title.text = if(progress.countFoundInScript[si] == 0) strUnknownScript else script.name
+                val met = progress.countFoundInScript[si] > 0
+                holder.title.text = if(met) script.name else strUnknownScript
                 holder.rv.adapter = CharacterGridAdapter(script, true)
+                if(met) View.OnClickListener {
+                    openFullScript(script)
+                }.let {
+                    holder.title.setOnClickListener(it)
+                    holder.rv.setOnClickListener(it)
+                }
                 Toast.makeText(context, "Bind section (script) $normalScriptsLoaded", LENGTH_SHORT).show()
             }
         }
         override fun getItemCount(): Int = 1 + normalScriptsLoaded //one section for Recent
-        fun loadSection() : Runnable {
+        fun loadSection() : Boolean {
             if(normalScriptsLoaded < Universe.allScripts.size){
                 normalScriptsLoaded++
-                return Runnable { notifyItemInserted(normalScriptsLoaded) }
+                notifyItemInserted(normalScriptsLoaded)
+                return true
             }
-            return Runnable {}
+            return false
         }
         fun updatePreviews(){
             notifyItemRangeChanged(0, itemCount)

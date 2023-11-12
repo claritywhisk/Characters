@@ -5,11 +5,11 @@ import kotlin.system.measureTimeMillis
 
 const val MUTE = true
 
-const val DEBUG_SMALL_SCRIPTS = false
-const val DEBUG_MAX_SCRIPT_SIZE = 40
+const val DEBUG_SMALL_SCRIPTS = true
+const val DEBUG_MAX_SCRIPT_SIZE = 45
 const val DEBUG_GLYPH_BOUNDS = false
-const val DEBUG_RESET_PROGRESS = true
-val CHAOS : Double = if(DEBUG_SMALL_SCRIPTS) .1 else .0003 //upper bound of test random
+const val DEBUG_RESET_PROGRESS = false
+val CHAOS : Double = if(DEBUG_SMALL_SCRIPTS) .02 else .0003 //upper bound of test random
 
 //worldview speed
 const val A = 1.3f//1f //(tiles/second)/second
