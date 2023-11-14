@@ -7,7 +7,6 @@ import asterhaven.characters.Universe.allScripts
 import asterhaven.characters.unicodescript.UnicodeScript
 import kotlinx.coroutines.*
 import java.util.*
-import kotlin.random.Random
 import java.io.File
 import java.lang.Integer.min
 import kotlin.collections.ArrayList
@@ -45,7 +44,7 @@ class Progress {
         }
         fun spawnRandomUnseen() : UnicodeCharacter? {
             if(iUnseen == list.size) return null
-            val i = iUnseen + Random.nextInt(list.size - iUnseen)
+            val i = iUnseen + rRandom.nextInt(list.size - iUnseen)
             list[iUnseen] = list[i].also { list[i] = list[iUnseen] }
             return UnicodeCharacter.get(script, list[iUnseen++])
         }
@@ -54,7 +53,7 @@ class Progress {
             val n = iFirstAfterSeen
             if(n == 0) return ret
             fun fisherYates(endPoint : Int){
-                val i = iFirstNewCatalog + Random.nextInt(endPoint - iFirstNewCatalog)
+                val i = iFirstNewCatalog + rRandom.nextInt(endPoint - iFirstNewCatalog)
                 list[iFirstNewCatalog] = list[i].also { list[i] = list[iFirstNewCatalog] }
                 ret.add(UnicodeCharacter.get(script, list[iFirstNewCatalog]))
                 iFirstNewCatalog++

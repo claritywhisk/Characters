@@ -11,7 +11,6 @@ import androidx.core.animation.doOnStart
 import asterhaven.characters.typeface.FontFallback
 import java.lang.RuntimeException
 import kotlin.properties.Delegates
-import kotlin.random.Random
 
 class SleepView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private lateinit var loc : DoubleArray
@@ -102,7 +101,7 @@ class SleepView(context: Context?, attrs: AttributeSet?) : View(context, attrs) 
     private fun character() = progress.spawnRandUnspawnedInScript(randScriptI()) //TODO verify behavior etc. this file
 
     private fun randScriptI() : Int {
-        var r4Script = Random.nextDouble() * sigmadims
+        var r4Script = rRandom.nextDouble() * sigmadims
         for (i in loc.indices) {
             if (loc[i] > r4Script) return i
             else r4Script -= loc[i]

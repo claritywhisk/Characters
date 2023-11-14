@@ -2,7 +2,6 @@ package asterhaven.characters
 
 import kotlinx.coroutines.*
 import kotlin.math.sqrt
-import kotlin.random.Random
 import kotlin.reflect.KProperty
 
 class Movement() {
@@ -38,7 +37,7 @@ class Movement() {
 
     private fun computeCharacter(i: Int, j: Int): UnicodeCharacter? {
         val dims : DoubleArray = tileOdds(i, j)
-        var roll = Random.nextDouble()
+        var roll = rRandom.nextDouble()
         for(si in SZ - 1 downTo 0) { // todo testing this backwards
             if(roll < dims[si]) return progress.spawnRandUnspawnedInScript(si)
             else roll -= dims[si]

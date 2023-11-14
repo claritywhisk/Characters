@@ -17,7 +17,7 @@ data class Coordinate private constructor(
             val sigmaDims = scriptDims.fold(0.0) {acc, dim -> acc + dim}
             var unicodeCharacter : UnicodeCharacter? = null
             for(si in scriptDims.indices){
-                if (Random.nextDouble() < scriptDims[si]) {
+                if (rRandom.nextDouble() < scriptDims[si]) {
                     if(unicodeCharacter != null){
                         return Coordinate(scriptDims, sigmaDims, Terrain.CLOUD, null)
                     }

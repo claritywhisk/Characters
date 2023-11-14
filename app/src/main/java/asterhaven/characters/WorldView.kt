@@ -195,7 +195,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
                         var maxsi = -1
                         var max = 0.0
                         for(si in 0 until Universe.allScripts.size) {
-                            kotlin.random.Random.nextDouble().let {
+                            rRandom.nextDouble().let {
                                 if(it < CHAOS) if(it >= max) {
                                     maxsi = si
                                     max = it
