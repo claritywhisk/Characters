@@ -11,6 +11,8 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -25,7 +27,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import asterhaven.characters.databinding.ActivityMainBinding
-import asterhaven.characters.databinding.CatalogBinding
 import asterhaven.characters.typeface.FontFallback
 import asterhaven.characters.unicodescript.UnicodeScript
 
@@ -34,6 +35,7 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
     private var prevPanelParams : LayoutParams = LayoutParams(0,0)
     private var didFirstAppear = false
     private var itemSize = CATALOG_COLUMN_STARTING_WIDTH_PX
+    private var openFullScriptI : Int = -1
     private val cat : ViewGroup
     private val previewSections : RecyclerView
     private val seenBackground : Drawable
@@ -113,7 +115,7 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
             binding.root.addView(it)
             if(didFirstAppear && it.id == R.id.catRoot) {
                 if(previewSections.isVisible) (previewSections.adapter as SectionAdapter).updatePreviews()
-                else updateFullScript(it.findViewById<LinearLayout>(R.id.fullScript))
+                else updateFullScript(it.findViewById(R.id.fullScript))
             }
         }
         didFirstAppear = true
@@ -123,12 +125,19 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
         cat.findViewById<LinearLayout>(R.id.fullScript).apply {
             visibility = VISIBLE
             findViewById<TextView>(R.id.sectionTitle).text = script.name
+            findViewById<ImageButton>(R.id.btnCatRightLeft).apply {
+                setImageResource(R.drawable.baseline_arrow_back_24)
+                setOnClickListener {
+                    backToPreviews()
+                }
+            }
             findViewById<RecyclerView>(R.id.sectionRecyclerView).apply {
                 gridRVInit { columnsAvail ->
                     columnsAvail.coerceAtMost(script.size)
                 }
                 adapter = CharacterGridAdapter(script, false)
             }
+            updateFullScript(this)
         }
         previewSections.visibility = GONE
     }
@@ -139,11 +148,13 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
         previewSections.visibility = VISIBLE
     }
     private fun updateFullScript(loneSection : LinearLayout){
+        loneSection.findViewById<TextView>(R.id.sectionProgress).text = numString(openFullScriptI)
         loneSection.findViewById<RecyclerView>(R.id.sectionRecyclerView).adapter.apply {
             this as CharacterGridAdapter
             notifyItemRangeChanged(0, itemCount) //todo with third, 'payload' parameter for performance?
         }
     }
+    private fun numString(si : Int) = "${progress.countFoundInScript[si]}/${Universe.allScripts[si].size}"
     private fun RecyclerView.gridRVInit(columns : (Int) -> Int) {
         post {
             val columnsAvail = (parent as FrameLayout).measuredWidth / itemSize
@@ -153,6 +164,8 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
     }
     inner class SectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.sectionTitle)
+        val second: TextView = itemView.findViewById(R.id.sectionProgress)
+        val btn: ImageButton = itemView.findViewById(R.id.btnCatRightLeft)
         val rv: RecyclerView = itemView.findViewById(R.id.sectionRecyclerView)
     }
     inner class SectionAdapter(private val context : Context) : RecyclerView.Adapter<SectionViewHolder>() {
@@ -168,6 +181,8 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
             }
             if(position == 0) {
                 holder.title.text = strRecent
+                holder.second.text = ""
+                holder.btn.visibility = View.INVISIBLE
                 holder.rv.adapter = CharacterGridAdapter(null, true)
                 //todo decide recent behavior and if "full" recent on click
             }
@@ -176,6 +191,11 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
                 val script = Universe.allScripts[si]
                 val met = progress.countFoundInScript[si] > 0
                 holder.title.text = if(met) script.name else strUnknownScript
+                holder.second.text = numString(si)
+                holder.btn.setOnClickListener {
+                    openFullScriptI = si
+                    openFullScript(script)
+                }
                 holder.rv.adapter = CharacterGridAdapter(script, true)
                 if(met) View.OnClickListener {
                     openFullScript(script)

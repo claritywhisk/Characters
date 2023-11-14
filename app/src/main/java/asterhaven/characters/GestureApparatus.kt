@@ -92,6 +92,11 @@ object GestureApparatus {
                 super.onShowPress(e)
                 v.occupant?.let{ v.startDragAndDrop(it) }
             }
+            override fun onSingleTapUp(e: MotionEvent?): Boolean {
+                super.onSingleTapUp(e)
+                examinerView.occupant = v.occupant
+                return true
+            }
         }
         else -> {
             throw UnsupportedOperationException()

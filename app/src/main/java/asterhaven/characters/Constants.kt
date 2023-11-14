@@ -5,7 +5,7 @@ import kotlin.system.measureTimeMillis
 
 const val MUTE = true
 
-const val DEBUG_SMALL_SCRIPTS = true
+const val DEBUG_SMALL_SCRIPTS = false
 const val DEBUG_MAX_SCRIPT_SIZE = 45
 const val DEBUG_GLYPH_BOUNDS = false
 const val DEBUG_RESET_PROGRESS = false
