@@ -14,7 +14,7 @@ import kotlin.collections.ArrayList
 import kotlin.reflect.KProperty
 
 //Todo versioning smooth transition when game updates
-class Progress(fresh : Boolean) {
+class Progress {
     //times seen before in world view
     val seenScriptChar = Array(allScripts.size){ si ->
         IntArray(allScripts[si].size)
@@ -29,14 +29,16 @@ class Progress(fresh : Boolean) {
     }
     class SeenUnseenInScript(private val script : UnicodeScript){
         //array of indices in script [seen... undefined (size of number currently spawned) ...unseen]
-        private val list = ArrayList<Int>(script.size)
+        private val list = IntArray(script.size){ ci -> ci } //initialize all unseen
         private var iFirstNewCatalog = 0
         private var iFirstAfterSeen = 0 //index of middle, if any
         private var iUnseen = 0
-        fun initAllUnseen(){
-            for(ci in 0 until script.size) list.add(ci)
+        fun initializationSeeOperation(ci: Int){
+            list[iUnseen] = list[ci].also { list[ci] = list[iUnseen] }
+            iUnseen++
+            iFirstAfterSeen++
         }
-        fun see(ci : Int) {
+        fun see(ci : Int) { //see a spawned char for the first time
             list[iFirstAfterSeen] = ci
             iFirstAfterSeen++
             if(BuildConfig.DEBUG) check(iUnseen >= iFirstAfterSeen)
@@ -74,10 +76,6 @@ class Progress(fresh : Boolean) {
     //indices of characters hiding around edges of world view
     private val spawned = HashSet<UnicodeCharacter>()
     private val keepSpawned = HashSet<UnicodeCharacter>()
-
-    init {
-        if(fresh) allCharsInScript.forEach { it.initAllUnseen() }
-    }
 
     @Synchronized fun see(c: UnicodeCharacter, ma: MainActivity) {
         if (spawned.contains(c)) {
@@ -147,7 +145,7 @@ class Progress(fresh : Boolean) {
         private fun loadAsync(file: File) = CoroutineScope(Dispatchers.IO).async {
             val bytes = file.readBytes()
             var j = 0
-            val p = Progress(false) //todo assure proper init
+            val p = Progress()
             for(si in allScripts.indices) {
                 var seenScript = true
                 for(ci in 0 until allScripts[si].size){
@@ -157,6 +155,7 @@ class Progress(fresh : Boolean) {
                         else -> {
                             p.seenScriptChar[si][ci] = x
                             p.countFoundInScript[si]++
+                            p.allCharsInScript[si].initializationSeeOperation(ci)
                         }
                     }
 
@@ -193,7 +192,7 @@ class Progress(fresh : Boolean) {
             else clearProgress()
         }
         fun clearProgress() {
-            progressAsync = CoroutineScope(Dispatchers.Main).async{ Progress(true) }
+            progressAsync = CoroutineScope(Dispatchers.Main).async{ Progress() }
             lazyLoadedFlag = false
         }
     }
