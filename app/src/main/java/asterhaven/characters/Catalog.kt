@@ -59,7 +59,7 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
         gd?.setColor(typedValue.data)
         unseenBackground = gd ?: seenBackground
         //set up outer recyclerview
-        previewSections = cat.findViewById(R.id.catalogSections )
+        previewSections = cat.findViewById(R.id.catalogSections)
         previewSections.post {
             previewSections.apply {
                 val layMan = LinearLayoutManager(activity)
@@ -120,17 +120,17 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
     }
     @Synchronized fun openFullScript(script : UnicodeScript){
         TransitionManager.beginDelayedTransition(cat)
-        previewSections.visibility = GONE
-        cat.findViewById<LinearLayout>(R.id.fullScript).let {
-            it.findViewById<TextView>(R.id.sectionTitle).text = script.name
-            it.findViewById<RecyclerView>(R.id.sectionRecyclerView).apply {
+        cat.findViewById<LinearLayout>(R.id.fullScript).apply {
+            visibility = VISIBLE
+            findViewById<TextView>(R.id.sectionTitle).text = script.name
+            findViewById<RecyclerView>(R.id.sectionRecyclerView).apply {
                 gridRVInit { columnsAvail ->
                     columnsAvail.coerceAtMost(script.size)
                 }
                 adapter = CharacterGridAdapter(script, false)
             }
-            it.visibility = VISIBLE
         }
+        previewSections.visibility = GONE
     }
     @Synchronized fun backToPreviews(){
         TransitionManager.beginDelayedTransition(cat)
@@ -145,11 +145,10 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
         }
     }
     private fun RecyclerView.gridRVInit(columns : (Int) -> Int) {
-        layoutManager = GridLayoutManager(context, 1)
         post {
             val columnsAvail = (parent as FrameLayout).measuredWidth / itemSize
-            (layoutManager as GridLayoutManager).spanCount =
-                columns(columnsAvail).coerceAtLeast(1)
+            val cols = columns(columnsAvail).coerceAtLeast(1)
+            layoutManager = GridLayoutManager(context, cols)
         }
     }
     inner class SectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
