@@ -11,11 +11,11 @@ var testValues = intArrayOf(0x11265, 0x16B5A, 0x16ACA, 0x10EAA, 0xDF2A4, 0x61)
 
 @Serializable
 data class UnicodeScript(val name : String, private val ranges : String){
-    @Transient val size : Int = run {
+    val size : Int by lazy { run {
         var s = 0
         rangeIterate { _, count -> s += count }
         s
-    }
+    }}
 
     fun codepointIterator() = object : Iterator<Int> {
         val rangeIterator = ranges.codePoints().iterator()
