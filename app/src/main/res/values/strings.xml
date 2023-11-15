@@ -7,4 +7,6 @@
     <string name="script_done_button">Leave</string>
     <string name="cat_recent_chars_title">Recent</string>
     <string name="cat_undiscovered_script_title">\?\?\?</string>
+    <string name="exam_clipboard_description">Unicode character</string>
+    <string name="exam_clipboard_copy_toast">Copied %s to clipboard!</string>
 </resources>

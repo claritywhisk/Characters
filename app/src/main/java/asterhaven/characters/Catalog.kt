@@ -121,6 +121,7 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
         didFirstAppear = true
     }
     @Synchronized fun openFullScript(script : UnicodeScript){
+        openFullScriptI = Universe.indexOfScript[script]!!
         TransitionManager.beginDelayedTransition(cat)
         cat.findViewById<LinearLayout>(R.id.fullScript).apply {
             visibility = VISIBLE
@@ -191,11 +192,9 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
                 val script = Universe.allScripts[si]
                 val met = progress.countFoundInScript[si] > 0
                 holder.title.text = if(met) script.name else strUnknownScript
-                holder.second.text = numString(si)
-                holder.btn.setOnClickListener {
-                    openFullScriptI = si
-                    openFullScript(script)
-                }
+                holder.second.text = if(met) numString(si) else ""
+                if(met) holder.btn.setOnClickListener{ openFullScript(script) }
+                else holder.btn.visibility = View.INVISIBLE //todo update when found script
                 holder.rv.adapter = CharacterGridAdapter(script, true)
                 if(met) View.OnClickListener {
                     openFullScript(script)
@@ -203,7 +202,7 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
                     holder.title.setOnClickListener(it)
                     holder.rv.setOnClickListener(it)
                 }
-                Toast.makeText(context, "Bind section (script) $normalScriptsLoaded", LENGTH_SHORT).show()
+                Toast.makeText(context, "Bind section (script) $normalScriptsLoaded", LENGTH_SHORT).show() //todo remove
             }
         }
         override fun getItemCount(): Int = 1 + normalScriptsLoaded //one section for Recent

@@ -69,17 +69,18 @@ object GestureApparatus {
                     v.postDelayed(dragAndDropIfNotLongPress, t.toLong())
                 }
             }
-
             override fun onLongPress(e: MotionEvent?) {
                 v.removeCallbacks(dragAndDropIfNotLongPress)
                 v.occupant?.let {
                     DragListener.beingDragged = null
                     val clipboard =
                         v.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip: ClipData = ClipData.newPlainText("Unicode character", it.asString)
+                    val txtUnicodeCharacter = v.context.resources.getString(R.string.exam_clipboard_description)
+                    val clip: ClipData = ClipData.newPlainText(txtUnicodeCharacter, it.asString)
                     clipboard.setPrimaryClip(clip)
                     if(true){//(Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2){//todo auto feedback after 31? S_V2
-                        Toast.makeText(v.context, "Copied ${it.asString} to clipboard!", Toast.LENGTH_SHORT).run {
+                        val msgCopied = v.context.resources.getString(R.string.exam_clipboard_copy_toast, it.asString)
+                        Toast.makeText(v.context, msgCopied, Toast.LENGTH_SHORT).run {
                             setGravity(Gravity.TOP, 0, 0)
                             show()
                         }

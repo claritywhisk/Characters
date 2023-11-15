@@ -22,7 +22,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:onClick="sleepButtonClick"
-        android:text="@string/sleep_button"
+        android:src="@drawable/baseline_zzz_24"
         app:layout_constraintBottom_toTopOf="@id/settings"
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toEndOf="parent"
