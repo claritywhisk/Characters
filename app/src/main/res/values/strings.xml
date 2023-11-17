@@ -9,4 +9,5 @@
     <string name="cat_undiscovered_script_title">\?\?\?</string>
     <string name="exam_clipboard_description">Unicode character</string>
     <string name="exam_clipboard_copy_toast">Copied %s to clipboard!</string>
+    <string name="progress_script_finished">Completed %s!</string>
 </resources>

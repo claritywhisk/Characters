@@ -89,12 +89,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            this.actionBar?.hide()
-            //TODO display menu in landscape, or abolish landscape
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            this.actionBar?.show()
-        }
+        if(BuildConfig.DEBUG) check(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) //landscape currently abolished
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) this.actionBar?.hide()
+        //} else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) this.actionBar?.show()
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
@@ -110,7 +107,7 @@ class MainActivity : AppCompatActivity() {
         }
         R.id.about -> {
             println("About World")
-            //todo credit
+            //todo credit, settings eat this menu
             true
         }
         else -> super.onOptionsItemSelected(item)

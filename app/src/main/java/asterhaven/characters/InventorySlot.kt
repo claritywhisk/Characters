@@ -96,8 +96,8 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : View(context, att
         super.onDraw(canvas)
         canvas?.let {
             if(confirmDelete.isOpen()){
-                trashCanDrawable?.setBounds(0, 0, width, height)
-                trashCanDrawable?.draw(canvas)
+                trashCanDrawable.setBounds(0, 0, width, height)
+                trashCanDrawable.draw(canvas)
             }
             else {
                 val occ = occupant ?: return //capture occupant (for thread safety)
@@ -111,7 +111,7 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : View(context, att
     }
 
     private val gestureDetector = GestureApparatus.gestureDetectorFor(this)
-    override fun onTouchEvent(event: MotionEvent): Boolean {//todo verify ok
+    override fun onTouchEvent(event: MotionEvent): Boolean {
         gestureDetector.onTouchEvent(event)
         if((context as MainActivity).inventoryDeleteConfirmation != null && !confirmDelete.isOpen()) return false
         return true //https://stackoverflow.com/a/23725322/2563422
@@ -130,7 +130,7 @@ class InventorySlot(context: Context?, attrs: AttributeSet?) : View(context, att
         fun didRespond() {
             action = true
             (context as MainActivity).inventoryDeleteConfirmation = null
-            postInvalidateDelayed(100) //todo
+            postInvalidateDelayed(INV_DELETE_RESPONSE_TIME)
         }
         fun isOpen() = !action && open
         fun slotTapped() {

@@ -20,6 +20,7 @@ const val SIDE_LENGTH = 7
 const val SELECTED_TIME = 500L //worldview tap highlight
 const val INV_DUP_FLASH_DURATION = 300L
 const val INV_HIGHLIGHT_DURATION = 200L
+const val INV_DELETE_RESPONSE_TIME = 50L
 //general glyph border
 const val SCALE_TEXT2TILE = .75f
 

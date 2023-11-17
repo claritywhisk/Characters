@@ -12,7 +12,6 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -152,7 +151,7 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
         loneSection.findViewById<TextView>(R.id.sectionProgress).text = numString(openFullScriptI)
         loneSection.findViewById<RecyclerView>(R.id.sectionRecyclerView).adapter.apply {
             this as CharacterGridAdapter
-            notifyItemRangeChanged(0, itemCount) //todo with third, 'payload' parameter for performance?
+            notifyItemRangeChanged(0, itemCount) //note optional 'payload' parameter in case of performance wish
         }
     }
     private fun numString(si : Int) = "${progress.countFoundInScript[si]}/${Universe.allScripts[si].size}"
@@ -202,7 +201,7 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
                     holder.title.setOnClickListener(it)
                     holder.rv.setOnClickListener(it)
                 }
-                Toast.makeText(context, "Bind section (script) $normalScriptsLoaded", LENGTH_SHORT).show() //todo remove
+                Toast.makeText(context, "Bind section (script) $normalScriptsLoaded", LENGTH_SHORT).show() //todo paginate, test, and remove
             }
         }
         override fun getItemCount(): Int = 1 + normalScriptsLoaded //one section for Recent

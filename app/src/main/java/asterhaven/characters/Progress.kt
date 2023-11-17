@@ -68,10 +68,13 @@ class Progress {
             }
             return ret
         }
+        fun unspawnAll(){
+            iUnseen = iFirstAfterSeen
+        }
     }
 
     //history of recently seen in world view and sleep
-    private val history = CircularArray<UnicodeCharacter>(PROGRESS_RECENT_SIZE) //todo
+    private val history = CircularArray<UnicodeCharacter>(PROGRESS_RECENT_SIZE)
     //indices of characters hiding around edges of world view
     private val spawned = HashSet<UnicodeCharacter>()
     private val keepSpawned = HashSet<UnicodeCharacter>()
@@ -90,14 +93,11 @@ class Progress {
                 if (sought) ma.progressBar?.setProgress(x, true)
                 if (x == allScripts[si].size) {
                     seenScript[si] = true
-                    val toast = Toast.makeText(
-                        ma,
-                        "Completed ${allScripts[si].name}!",//todo string resource
-                        Toast.LENGTH_LONG
-                    )
+                    val msg = ma.resources.getString(R.string.progress_script_finished, allScripts[si].name)
+                    val toast = Toast.makeText(ma, msg, Toast.LENGTH_LONG)
                     toast.setGravity(Gravity.TOP, 0, 0)
                     toast.show()
-                    ma.logToTextView("Completed ${allScripts[si].name}!")
+                    ma.logToTextView(msg)
                     if (sought) ma.finishedWithScript()
                 }
             }
@@ -109,6 +109,7 @@ class Progress {
     }
     fun doNotUnspawn(c : UnicodeCharacter) = keepSpawned.add(c)
     fun unspawnRemaining(){
+        allCharsInScript.forEach { it.unspawnAll() }
         spawned.removeAll { it !in keepSpawned }
         keepSpawned.clear()
     }
@@ -148,8 +149,7 @@ class Progress {
             for(si in allScripts.indices) {
                 var seenScript = true
                 for(ci in 0 until allScripts[si].size){
-                    val x = bytes[j++].toInt()
-                    when(x) {
+                    when(val x = bytes[j++].toInt()) {
                         0 -> seenScript = false
                         else -> {
                             p.seenScriptChar[si][ci] = x
@@ -157,7 +157,6 @@ class Progress {
                             p.allCharsInScript[si].initializationSeeOperation(ci)
                         }
                     }
-
                 }
                 p.seenScript[si] = seenScript
             }

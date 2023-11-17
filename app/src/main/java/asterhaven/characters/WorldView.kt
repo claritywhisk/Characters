@@ -15,14 +15,12 @@ import kotlinx.coroutines.runBlocking
 import java.util.*
 import kotlin.system.measureTimeMillis
 
-const val EXTENDED_MAP_SIZE = SIDE_LENGTH + 4 //todo?
+const val EXTENDED_MAP_SIZE = SIDE_LENGTH + 4
 const val SIDE_LENGTH_EXTENDED = SIDE_LENGTH + 2
 private val LOCAL_RANGE = 1..SIDE_LENGTH_EXTENDED
 private val VISIBLE_RANGE = 2..(SIDE_LENGTH + 1)
 
 class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs), DragStarter {
-    companion object { init { require(SIDE_LENGTH % 2 == 1) } }//todo
-
     private val walk = Walk(this) //contains px offsets from current center
     private val movement by Movement
 
@@ -76,6 +74,7 @@ class WorldView(context: Context?, attrs: AttributeSet?) : View(context, attrs),
         movement.startUpdate()
     }
 
+    //TODO this is only one of the outer rings and the unspawn logic is not right
     fun outerComputedMapCoords() = Array<Pair<Int, Int>>(4 * (EXTENDED_MAP_SIZE - 1)){ i ->
         val s = EXTENDED_MAP_SIZE
         when {

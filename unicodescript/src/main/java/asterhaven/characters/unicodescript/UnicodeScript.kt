@@ -2,7 +2,6 @@ package asterhaven.characters.unicodescript
 
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
-import java.lang.IllegalStateException
 
 fun decodeAllUS(str : String) : List<UnicodeScript> = Json.decodeFromString(str)
 fun encodeAllUS(list : List<UnicodeScript>) : String = Json.encodeToString(list)
@@ -20,7 +19,7 @@ data class UnicodeScript(val name : String, private val ranges : String){
     fun codepointIterator() = object : Iterator<Int> {
         val rangeIterator = ranges.codePoints().iterator()
         var first = 0
-        var last = -1 //todo confirm name "last" (iirc about ranges)
+        var last = -1
         var i = 0
         override fun hasNext() = first + i <= last || rangeIterator.hasNext()
         override fun next(): Int {
@@ -47,7 +46,7 @@ data class UnicodeScript(val name : String, private val ranges : String){
     }
 
     override fun toString(): String {
-        var str = StringBuilder("$name ($size characters)\n")
+        val str = StringBuilder("$name ($size characters)\n")
         for(c in codepointIterator()) str.append(c)
         str.append("\n")
         return str.toString()

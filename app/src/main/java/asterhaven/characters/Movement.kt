@@ -38,7 +38,7 @@ class Movement() {
     private fun computeCharacter(i: Int, j: Int): UnicodeCharacter? {
         val dims : DoubleArray = tileOdds(i, j)
         var roll = rRandom.nextDouble()
-        for(si in SZ - 1 downTo 0) { // todo testing this backwards
+        for(si in 0 until SZ) {
             if(roll < dims[si]) return progress.spawnRandUnspawnedInScript(si)
             else roll -= dims[si]
         }
@@ -63,7 +63,7 @@ class Movement() {
         return odds
     }
 
-    private val extendedRange = 1..SIDE_LENGTH_EXTENDED //todo +1 -1 name localMap
+    private val extendedRange = 1..SIDE_LENGTH_EXTENDED
     private inline fun forLocalMap(f : (Int, Int, UnicodeCharacter?) -> Unit){
         for(i in extendedRange) for(j in extendedRange) f(i, j, wv.computedMap[i][j].character)
     }
@@ -75,13 +75,14 @@ class Movement() {
             runBlocking {
                 updateJob?.join()
             }
+            //initiate respawn of map edges according to inventory probability
             wv.outerComputedMapCoords().forEach {
                 wv.computedMap[it.first][it.second].let { tile ->
                     if(tile is DeferredTile) tile.cancel = true
-                    //tile.character?.let { c -> progress.mayUnspawn(c) } Todo: this method has broken with recent changes
                 }
                 movement.requisition(it.first, it.second)
             }
+            progress.unspawnRemaining()
             startUpdate()
         }
     }
