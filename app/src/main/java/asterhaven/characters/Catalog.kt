@@ -16,7 +16,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
@@ -41,7 +40,7 @@ class Catalog(binding: ActivityMainBinding, activity: MainActivity) {
     private val unseenBackground : Drawable
     private val progress by Progress
     init {
-        cat = activity.layoutInflater.inflate(R.layout.catalog, null) as ConstraintLayout
+        cat = activity.layoutInflater.inflate(R.layout.catalog, null) as LinearLayout
         viewsRemoved = listOf(cat)
         cat.layoutParams = LayoutParams(0,0)
         cat.updateLayoutParams<LayoutParams> {
