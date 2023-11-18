@@ -68,8 +68,15 @@ class Progress {
             }
             return ret
         }
-        fun unspawnAll(){
-            iUnseen = iFirstAfterSeen
+        fun unspawn(ci : Int){
+            val i = (iFirstAfterSeen until iUnseen).firstOrNull {i ->
+                list[i] == ci
+            }
+            if(BuildConfig.DEBUG) check(i != null)
+            if(i != null){
+                iUnseen--
+                list[iUnseen] = list[i].also { list[i] = list[iUnseen] }
+            }
         }
     }
 
@@ -109,8 +116,10 @@ class Progress {
     }
     fun doNotUnspawn(c : UnicodeCharacter) = keepSpawned.add(c)
     fun unspawnRemaining(){
-        allCharsInScript.forEach { it.unspawnAll() }
-        spawned.removeAll { it !in keepSpawned }
+        spawned.filter{ it !in keepSpawned }.forEach {
+            spawned.remove(it)
+            allCharsInScript[it.scriptIndex()].unspawn(it.i)
+        }
         keepSpawned.clear()
     }
     fun seen(s : UnicodeScript, i : Int) = seenScriptChar[Universe.indexOfScript[s]!!][i] > 0
