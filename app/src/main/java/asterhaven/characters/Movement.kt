@@ -30,7 +30,7 @@ class Movement() {
     fun startUpdate() {
         updateJob = CoroutineScope(Dispatchers.Default).launch {
             next.shuffle()
-            for ((i, j) in next) wv.computedMap[i][j] = DeferredTile( async { computeCharacter(i, j) } )
+            for ((i, j) in next) wv.computedMap[i][j] = DeferredTile( async { computeCharacter(i, j) } ) //TODO java.util.ConcurrentModificationException - debugger??
             next.clear()
         }
     }

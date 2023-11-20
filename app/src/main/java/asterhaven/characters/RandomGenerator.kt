@@ -1,3 +1,5 @@
 package asterhaven.characters
 
-val rRandom = kotlin.random.Random(System.currentTimeMillis())
+import kotlin.random.*
+
+val rRandom = if(DEBUG_DETERMINISTICISH) Random(42) else Random(System.currentTimeMillis())

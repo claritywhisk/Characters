@@ -9,6 +9,7 @@ import kotlinx.coroutines.*
 import java.util.*
 import java.io.File
 import java.lang.Integer.min
+import kotlin.NoSuchElementException
 import kotlin.collections.ArrayList
 import kotlin.reflect.KProperty
 
@@ -32,20 +33,23 @@ class Progress {
         private var iFirstNewCatalog = 0
         private var iFirstAfterSeen = 0 //index of middle, if any
         private var iUnseen = 0
+
         fun initializationSeeOperation(ci: Int){
-            list[iUnseen] = list[ci].also { list[ci] = list[iUnseen] }
+            swap(iUnseen, ci)
             iUnseen++
             iFirstAfterSeen++
         }
         fun see(ci : Int) { //see a spawned char for the first time
-            list[iFirstAfterSeen] = ci
-            iFirstAfterSeen++
-            if(BuildConfig.DEBUG) check(iUnseen >= iFirstAfterSeen)
+            indexOfSpawned(ci)?.let {
+                swap(iFirstAfterSeen, it)
+                iFirstAfterSeen++
+                if (BuildConfig.DEBUG) check(iUnseen >= iFirstAfterSeen)
+            }
         }
         fun spawnRandomUnseen() : UnicodeCharacter? {
             if(iUnseen == list.size) return null
             val i = iUnseen + rRandom.nextInt(list.size - iUnseen)
-            list[iUnseen] = list[i].also { list[i] = list[iUnseen] }
+            swap(iUnseen, i)
             return UnicodeCharacter.get(script, list[iUnseen++])
         }
         fun chooseKUniqueForCatalogPreview(k : Int) : ArrayList<UnicodeCharacter> {
@@ -54,7 +58,7 @@ class Progress {
             if(n == 0) return ret
             fun fisherYates(endPoint : Int){
                 val i = iFirstNewCatalog + rRandom.nextInt(endPoint - iFirstNewCatalog)
-                list[iFirstNewCatalog] = list[i].also { list[i] = list[iFirstNewCatalog] }
+                swap(iFirstNewCatalog, i)
                 ret.add(UnicodeCharacter.get(script, list[iFirstNewCatalog]))
                 iFirstNewCatalog++
             }
@@ -69,17 +73,22 @@ class Progress {
             return ret
         }
         fun unspawn(ci : Int){
+            indexOfSpawned(ci)?.let {
+                iUnseen--
+                swap(iUnseen, it)
+            }
+        }
+        private fun swap(i : Int, j : Int){
+            list[i] = list[j].also { list[j] = list[i] }
+        }
+        private fun indexOfSpawned(ci : Int) : Int? {
             val i = (iFirstAfterSeen until iUnseen).firstOrNull {i ->
                 list[i] == ci
             }
             if(BuildConfig.DEBUG) check(i != null)
-            if(i != null){
-                iUnseen--
-                list[iUnseen] = list[i].also { list[i] = list[iUnseen] }
-            }
+            return i
         }
     }
-
     //history of recently seen in world view and sleep
     private val history = CircularArray<UnicodeCharacter>(PROGRESS_RECENT_SIZE)
     //indices of characters hiding around edges of world view
@@ -114,8 +123,8 @@ class Progress {
     @Synchronized fun spawnRandUnspawnedInScript(si: Int) = allCharsInScript[si].spawnRandomUnseen().also {
         if(it != null) spawned.add(it)
     }
-    fun doNotUnspawn(c : UnicodeCharacter) = keepSpawned.add(c)
-    fun unspawnRemaining(){
+    @Synchronized fun doNotUnspawn(c : UnicodeCharacter) = keepSpawned.add(c)
+    @Synchronized fun unspawnRemaining(){
         spawned.filter{ it !in keepSpawned }.forEach {
             spawned.remove(it)
             allCharsInScript[it.scriptIndex()].unspawn(it.i)
