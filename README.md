@@ -1,6 +1,6 @@
-Originally built to test a "walking map" (procedurally generated) concept, this project added functionality for collecting and properly exploring Unicode characters. It's important to recognize world linguistic heritage. However, the Android app is not published and the project is not currently in development.
+Originally built to test a "walking map" (procedurally generated) concept, this project added functionality for collecting and properly exploring Unicode characters. It helps appreciate world linguistic heritage. However, the Android app is not published and the project is not currently in development.
 
-Video of main screen with walkable map, examiner and drag-and-drop inventory.
+Video of main screen with walkable map, examiner and drag-and-drop inventory:
 
 https://github.com/user-attachments/assets/1695e158-29dc-41b6-9ddc-da148275eb09
 
